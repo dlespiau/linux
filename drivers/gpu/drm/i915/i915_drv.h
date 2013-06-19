@@ -1393,8 +1393,16 @@ typedef struct drm_i915_private {
 	/* Old dri1 support infrastructure, beware the dragons ya fools entering
 	 * here! */
 	struct i915_dri1_state dri1;
+
 	/* Old ums support infrastructure, same warning applies. */
 	struct i915_ums_state ums;
+
+#ifdef CONFIG_DEBUG_FS
+	bool drm_i915_pipe_crc_enabled;
+	uint32_t drm_i915_pipe_timestamp[3][200];
+	uint32_t drm_i915_pipe_crc[3][200][5];
+	atomic_t drm_i915_pipe_crc_current[3];
+#endif
 } drm_i915_private_t;
 
 static inline struct drm_i915_private *to_i915(const struct drm_device *dev)

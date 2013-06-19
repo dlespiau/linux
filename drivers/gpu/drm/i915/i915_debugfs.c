@@ -2198,6 +2198,41 @@ static int i915_debugfs_create(struct dentry *root,
 	return drm_add_fake_info_node(minor, ent, fops);
 }
 
+static int i915_pipe_crc(struct seq_file *m, void *data)
+{
+	struct drm_info_node *node = (struct drm_info_node *) m->private;
+	struct drm_device *dev = node->minor->dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
+	uintptr_t pipe = (uintptr_t)node->info_ent->data;
+	int i;
+	int start;
+
+	if (!IS_IVYBRIDGE(dev)) {
+		seq_printf(m, "unsupported\n");
+		return 0;
+	}
+
+	if (!dev_priv->drm_i915_pipe_crc_enabled) {
+		I915_WRITE(PIPE_CRC_CTL, PIPE_ENABLE_CRC);
+		dev_priv->drm_i915_pipe_crc_enabled = true;
+	}
+
+	start = atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe])+1;
+	seq_printf(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
+	for (i=0; i<200; i++) {
+		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n",
+			dev_priv->drm_i915_pipe_timestamp[pipe][(start+i)%200],
+			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][0],
+			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][1],
+			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][2],
+			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][3],
+			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][4]);
+	}
+
+	return 0;
+}
+
+
 static struct drm_info_list i915_debugfs_list[] = {
 	{"i915_capabilities", i915_capabilities, 0},
 	{"i915_gem_objects", i915_gem_object_info, 0},
@@ -2237,6 +2272,9 @@ static struct drm_info_list i915_debugfs_list[] = {
 	{"i915_edp_psr_status", i915_edp_psr_status, 0},
 	{"i915_energy_uJ", i915_energy_uJ, 0},
 	{"i915_pc8_status", i915_pc8_status, 0},
+	{"i915_pipe_A_crc", i915_pipe_crc, 0, (void *)0},
+	{"i915_pipe_B_crc", i915_pipe_crc, 0, (void *)1},
+	{"i915_pipe_C_crc", i915_pipe_crc, 0, (void *)2},
 };
 #define I915_DEBUGFS_ENTRIES ARRAY_SIZE(i915_debugfs_list)
 
