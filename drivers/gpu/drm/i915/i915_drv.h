@@ -1612,7 +1612,7 @@ struct drm_i915_file_private {
 #define INTEL_RC6p_ENABLE			(1<<1)
 #define INTEL_RC6pp_ENABLE			(1<<2)
 
-extern struct drm_ioctl_desc i915_ioctls[];
+extern const struct drm_ioctl_desc i915_ioctls[];
 extern int i915_max_ioctl;
 extern unsigned int i915_fbpercrtc __always_unused;
 extern int i915_panel_ignore_lid __read_mostly;
@@ -1791,8 +1791,6 @@ int i915_gem_dumb_create(struct drm_file *file_priv,
 			 struct drm_mode_create_dumb *args);
 int i915_gem_mmap_gtt(struct drm_file *file_priv, struct drm_device *dev,
 		      uint32_t handle, uint64_t *offset);
-int i915_gem_dumb_destroy(struct drm_file *file_priv, struct drm_device *dev,
-			  uint32_t handle);
 /**
  * Returns true if seq1 is later than seq2.
  */
