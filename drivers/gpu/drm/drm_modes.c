@@ -704,15 +704,47 @@ int drm_mode_vrefresh(const struct drm_display_mode *mode)
 }
 EXPORT_SYMBOL(drm_mode_vrefresh);
 
+static bool drm_mode_is_ntsc(const struct drm_display_mode *mode)
+{
+	int ntsc_clock;
+
+	ntsc_clock = DIV_ROUND_UP(mode->vtotal * mode->htotal * mode->vrefresh,
+				  1001);
+
+	if (ntsc_clock == mode->clock)
+		return true;
+
+	return false;
+}
+
+static void drm_mode_reconstruct_crtc_clock(struct drm_display_mode *mode)
+{
+	int clock;
+
+	clock = mode->crtc_vtotal * mode->crtc_htotal *
+		drm_mode_vrefresh(mode) / 1000;
+
+	if (drm_mode_is_ntsc(mode))
+		mode->crtc_clock = DIV_ROUND_UP(clock * 1000, 1001);
+	else
+		mode->crtc_clock = clock;
+}
+
 /**
  * drm_mode_set_crtcinfo - set CRTC modesetting parameters
  * @p: mode
- * @adjust_flags: unused? (FIXME)
+ * @adjust_flags: a combination of adjustment flags
  *
  * LOCKING:
  * None.
  *
  * Setup the CRTC modesetting parameters for @p, adjusting if necessary.
+ *
+ * - The CRTC_INTERLACE_HALVE_V flag can be used to halve vertical timings of
+ *   interlaced modes.
+ * - The CRTC_STEREO_DOUBLE flag can be used to compute the timings for
+ *   buffers containing two eyes (only adjust the timings when needed, eg. for
+ *   "frame packing" or "side by side full").
  */
 void drm_mode_set_crtcinfo(struct drm_display_mode *p, int adjust_flags)
 {
@@ -751,6 +783,23 @@ void drm_mode_set_crtcinfo(struct drm_display_mode *p, int adjust_flags)
 		p->crtc_vsync_start *= p->vscan;
 		p->crtc_vsync_end *= p->vscan;
 		p->crtc_vtotal *= p->vscan;
+	}
+
+	if (adjust_flags & CRTC_STEREO_DOUBLE) {
+		unsigned int layout = p->flags & DRM_MODE_FLAG_3D_MASK;
+		int vactive_space;
+
+		switch (layout) {
+		case DRM_MODE_FLAG_3D_FRAME_PACKING:
+			vactive_space = p->vtotal - p->vdisplay;
+
+			p->crtc_vdisplay += p->vdisplay + vactive_space;
+			p->crtc_vsync_start += p->vdisplay + vactive_space;
+			p->crtc_vsync_end += p->vdisplay + vactive_space;
+			p->crtc_vtotal += p->vdisplay + vactive_space;
+			drm_mode_reconstruct_crtc_clock(p);
+			break;
+		}
 	}
 
 	p->crtc_vblank_start = min(p->crtc_vsync_start, p->crtc_vdisplay);
