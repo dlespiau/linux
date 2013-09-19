@@ -740,14 +740,14 @@ bool intel_crtc_active(struct drm_crtc *crtc)
 	/* Be paranoid as we can arrive here with only partial
 	 * state retrieved from the hardware during setup.
 	 *
-	 * We can ditch the adjusted_mode.clock check as soon
+	 * We can ditch the adjusted_mode.crtc_clock check as soon
 	 * as Haswell has gained clock readout/fastboot support.
 	 *
 	 * We can ditch the crtc->fb check as soon as we can
 	 * properly reconstruct framebuffers.
 	 */
 	return intel_crtc->active && crtc->fb &&
-		intel_crtc->config.adjusted_mode.clock;
+		intel_crtc->config.adjusted_mode.crtc_clock;
 }
 
 enum transcoder intel_pipe_to_cpu_transcoder(struct drm_i915_private *dev_priv,
@@ -2914,7 +2914,7 @@ static void lpt_program_iclkip(struct drm_crtc *crtc)
 {
 	struct drm_device *dev = crtc->dev;
 	struct drm_i915_private *dev_priv = dev->dev_private;
-	int clock = to_intel_crtc(crtc)->config.adjusted_mode.clock;
+	int clock = to_intel_crtc(crtc)->config.adjusted_mode.crtc_clock;
 	u32 divsel, phaseinc, auxdiv, phasedir = 0;
 	u32 temp;
 
@@ -2938,8 +2938,8 @@ static void lpt_program_iclkip(struct drm_crtc *crtc)
 		phaseinc = 0x20;
 	} else {
 		/* The iCLK virtual clock root frequency is in MHz,
-		 * but the adjusted_mode->clock in in KHz. To get the divisors,
-		 * it is necessary to divide one by another, so we
+		 * but the adjusted_mode->crtc_clock in in KHz. To get the
+		 * divisors, it is necessary to divide one by another, so we
 		 * convert the virtual clock precision to KHz here for higher
 		 * precision.
 		 */
@@ -4101,7 +4101,7 @@ retry:
 	 */
 	link_bw = intel_fdi_link_freq(dev) * MHz(100)/KHz(1)/10;
 
-	fdi_dotclock = adjusted_mode->clock;
+	fdi_dotclock = adjusted_mode->crtc_clock;
 
 	lane = ironlake_get_lanes_required(fdi_dotclock, link_bw,
 					   pipe_config->pipe_bpp);
@@ -4157,12 +4157,12 @@ static int intel_crtc_compute_config(struct intel_crtc *crtc,
 		 * otherwise pipe A only.
 		 */
 		if ((crtc->pipe == PIPE_A || IS_I915G(dev)) &&
-		    adjusted_mode->clock > clock_limit * 9 / 10) {
+		    adjusted_mode->crtc_clock > clock_limit * 9 / 10) {
 			clock_limit *= 2;
 			pipe_config->double_wide = true;
 		}
 
-		if (adjusted_mode->clock > clock_limit * 9 / 10)
+		if (adjusted_mode->crtc_clock > clock_limit * 9 / 10)
 			return -EINVAL;
 	}
 
@@ -4822,7 +4822,7 @@ static void intel_crtc_mode_from_pipe_config(struct intel_crtc *intel_crtc,
 
 	crtc->mode.flags = pipe_config->adjusted_mode.flags;
 
-	crtc->mode.clock = pipe_config->adjusted_mode.clock;
+	crtc->mode.clock = pipe_config->adjusted_mode.crtc_clock;
 	crtc->mode.flags |= pipe_config->adjusted_mode.flags;
 }
 
@@ -7462,7 +7462,7 @@ static void i9xx_crtc_clock_get(struct intel_crtc *crtc,
 
 	/*
 	 * This value includes pixel_multiplier. We will use
-	 * port_clock to compute adjusted_mode.clock in the
+	 * port_clock to compute adjusted_mode.crtc_clock in the
 	 * encoder's get_config() function.
 	 */
 	pipe_config->port_clock = clock.dot;
@@ -7497,11 +7497,11 @@ static void ironlake_pch_clock_get(struct intel_crtc *crtc,
 
 	/*
 	 * This value does not include pixel_multiplier.
-	 * We will check that port_clock and adjusted_mode.clock
+	 * We will check that port_clock and adjusted_mode.crtc_clock
 	 * agree once we know their relationship in the encoder's
 	 * get_config() function.
 	 */
-	pipe_config->adjusted_mode.clock =
+	pipe_config->adjusted_mode.crtc_clock =
 		intel_dotclock_calculate(intel_fdi_link_freq(dev) * 10000,
 					 &pipe_config->fdi_m_n);
 }
@@ -7539,7 +7539,7 @@ struct drm_display_mode *intel_crtc_mode_get(struct drm_device *dev,
 	pipe_config.dpll_hw_state.fp1 = I915_READ(FP1(pipe));
 	i9xx_crtc_clock_get(intel_crtc, &pipe_config);
 
-	mode->clock = pipe_config.adjusted_mode.clock;
+	mode->clock = pipe_config.adjusted_mode.crtc_clock;
 	mode->hdisplay = (htot & 0xffff) + 1;
 	mode->htotal = ((htot & 0xffff0000) >> 16) + 1;
 	mode->hsync_start = (hsync & 0xffff) + 1;
@@ -8478,8 +8478,8 @@ encoder_retry:
 	/* Set default port clock if not overwritten by the encoder. Needs to be
 	 * done afterwards in case the encoder adjusts the mode. */
 	if (!pipe_config->port_clock)
-		pipe_config->port_clock = pipe_config->adjusted_mode.clock *
-			pipe_config->pixel_multiplier;
+		pipe_config->port_clock = pipe_config->adjusted_mode.crtc_clock
+			* pipe_config->pixel_multiplier;
 
 	ret = intel_crtc_compute_config(to_intel_crtc(crtc), pipe_config);
 	if (ret < 0) {
@@ -8809,7 +8809,7 @@ intel_pipe_config_compare(struct drm_device *dev,
 		PIPE_CONF_CHECK_I(pipe_bpp);
 
 	if (!IS_HASWELL(dev)) {
-		PIPE_CONF_CHECK_CLOCK_FUZZY(adjusted_mode.clock);
+		PIPE_CONF_CHECK_CLOCK_FUZZY(adjusted_mode.crtc_clock);
 		PIPE_CONF_CHECK_CLOCK_FUZZY(port_clock);
 	}
 
@@ -9031,9 +9031,9 @@ void ironlake_check_encoder_dotclock(const struct intel_crtc_config *pipe_config
 	 * FDI already provided one idea for the dotclock.
 	 * Yell if the encoder disagrees.
 	 */
-	WARN(!intel_fuzzy_clock_check(pipe_config->adjusted_mode.clock, dotclock),
+	WARN(!intel_fuzzy_clock_check(pipe_config->adjusted_mode.crtc_clock, dotclock),
 	     "FDI dotclock and encoder dotclock mismatch, fdi: %i, encoder: %i\n",
-	     pipe_config->adjusted_mode.clock, dotclock);
+	     pipe_config->adjusted_mode.crtc_clock, dotclock);
 }
 
 static int __intel_set_mode(struct drm_crtc *crtc,

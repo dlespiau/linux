@@ -110,7 +110,7 @@ static void intel_crt_get_config(struct intel_encoder *encoder,
 	if (HAS_PCH_SPLIT(dev_priv->dev))
 		ironlake_check_encoder_dotclock(pipe_config, dotclock);
 
-	pipe_config->adjusted_mode.clock = dotclock;
+	pipe_config->adjusted_mode.crtc_clock = dotclock;
 }
 
 /* Note: The caller is required to filter out dpms modes not supported by the
