@@ -1092,7 +1092,8 @@ static void dp_aux_irq_handler(struct drm_device *dev)
 	wake_up_all(&dev_priv->gmbus_wait_queue);
 }
 
-static void pipe_update_crc(struct drm_device *dev, int pipe) {
+static void pipe_update_crc(struct drm_device *dev, int pipe)
+{
 	drm_i915_private_t *dev_priv = dev->dev_private;
 	ktime_t now;
 	int tslot;
