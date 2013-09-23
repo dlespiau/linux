@@ -2219,7 +2219,7 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 
 	start = atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe])+1;
 	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
-	for (i=0; i<200; i++) {
+	for (i = 0; i < 200; i++) {
 		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n",
 			dev_priv->drm_i915_pipe_timestamp[pipe][(start+i)%200],
 			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][0],
