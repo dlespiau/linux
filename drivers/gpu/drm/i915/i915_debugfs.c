@@ -2213,7 +2213,7 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 	}
 
 	if (!dev_priv->drm_i915_pipe_crc_enabled) {
-		I915_WRITE(PIPE_CRC_CTL, PIPE_ENABLE_CRC);
+		I915_WRITE(PIPE_CRC_CTL, PIPE_CRC_ENABLE);
 		dev_priv->drm_i915_pipe_crc_enabled = true;
 	}
 

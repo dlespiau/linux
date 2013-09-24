@@ -1840,7 +1840,7 @@
 
 /* Pipe A CRC regs */
 #define _PIPE_CRC_CTL_A	(dev_priv->info->display_mmio_offset + 0x60050)
-#define   PIPE_ENABLE_CRC (0x1<<31)
+#define   PIPE_CRC_ENABLE		(1 << 31)
 #define   PIPE_CRC_SOURCE_SELECT_MARK	(0x3<<29)
 #define   PIPE_CRC_SOURCE_PRIMARY	0
 #define   PIPE_CRC_SOURCE_SPRITE	1
