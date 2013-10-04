@@ -1839,7 +1839,7 @@
  */
 
 /* Pipe A CRC regs */
-#define _PIPE_CRC_CTL_A	(dev_priv->info->display_mmio_offset + 0x60050)
+#define _PIPE_CRC_CTL_A		(dev_priv->info->display_mmio_offset + 0x60050)
 #define   PIPE_CRC_ENABLE		(1 << 31)
 #define   PIPE_CRC_SOURCE_PRIMARY	(0 << 29)
 #define   PIPE_CRC_SOURCE_SPRITE	(1 << 29)
@@ -1851,7 +1851,7 @@
 #define _PIPE_A_CH5_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x60074)
 
 /* Pipe B CRC regs */
-#define _PIPE_CRC_CTL_B	(dev_priv->info->display_mmio_offset + 0x61050)
+#define _PIPE_CRC_CTL_B		(dev_priv->info->display_mmio_offset + 0x61050)
 #define _PIPE_B_CH1_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x61064)
 #define _PIPE_B_CH2_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x61068)
 #define _PIPE_B_CH3_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x6106c)
