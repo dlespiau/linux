@@ -2212,11 +2212,6 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 		return 0;
 	}
 
-	if (!dev_priv->drm_i915_pipe_crc_enabled) {
-		I915_WRITE(PIPE_CRC_CTL(pipe), PIPE_CRC_ENABLE);
-		dev_priv->drm_i915_pipe_crc_enabled = true;
-	}
-
 	start = atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe])+1;
 	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
 	for (i = 0; i < 200; i++) {

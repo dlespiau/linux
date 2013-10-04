@@ -1398,7 +1398,6 @@ typedef struct drm_i915_private {
 	struct i915_ums_state ums;
 
 #ifdef CONFIG_DEBUG_FS
-	bool drm_i915_pipe_crc_enabled;
 	uint32_t drm_i915_pipe_timestamp[I915_MAX_PIPES][200];
 	uint32_t drm_i915_pipe_crc[I915_MAX_PIPES][200][5];
 	atomic_t drm_i915_pipe_crc_current[I915_MAX_PIPES];
