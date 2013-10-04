@@ -2272,9 +2272,9 @@ static struct drm_info_list i915_debugfs_list[] = {
 	{"i915_edp_psr_status", i915_edp_psr_status, 0},
 	{"i915_energy_uJ", i915_energy_uJ, 0},
 	{"i915_pc8_status", i915_pc8_status, 0},
-	{"i915_pipe_A_crc", i915_pipe_crc, 0, (void *)0},
-	{"i915_pipe_B_crc", i915_pipe_crc, 0, (void *)1},
-	{"i915_pipe_C_crc", i915_pipe_crc, 0, (void *)2},
+	{"i915_pipe_A_crc", i915_pipe_crc, 0, (void *)PIPE_A},
+	{"i915_pipe_B_crc", i915_pipe_crc, 0, (void *)PIPE_B},
+	{"i915_pipe_C_crc", i915_pipe_crc, 0, (void *)PIPE_C},
 };
 #define I915_DEBUGFS_ENTRIES ARRAY_SIZE(i915_debugfs_list)
 

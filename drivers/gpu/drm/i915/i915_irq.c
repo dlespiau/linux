@@ -1293,13 +1293,13 @@ static void ivb_err_int_handler(struct drm_device *dev)
 			DRM_DEBUG_DRIVER("Pipe C FIFO underrun\n");
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_A)
-		pipe_update_crc(dev, 0);
+		pipe_update_crc(dev, PIPE_A);
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_B)
-		pipe_update_crc(dev, 1);
+		pipe_update_crc(dev, PIPE_B);
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_C)
-		pipe_update_crc(dev, 2);
+		pipe_update_crc(dev, PIPE_C);
 
 	I915_WRITE(GEN7_ERR_INT, err_int);
 }
