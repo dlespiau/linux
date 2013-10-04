@@ -2203,7 +2203,7 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 	struct drm_info_node *node = (struct drm_info_node *) m->private;
 	struct drm_device *dev = node->minor->dev;
 	struct drm_i915_private *dev_priv = dev->dev_private;
-	uintptr_t pipe = (uintptr_t)node->info_ent->data;
+	enum pipe pipe = (enum pipe)node->info_ent->data;
 	int i;
 	int start;
 

@@ -1093,7 +1093,7 @@ static void dp_aux_irq_handler(struct drm_device *dev)
 }
 
 #if defined(CONFIG_DEBUG_FS)
-static void ivb_pipe_update_crc(struct drm_device *dev, int pipe)
+static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct i915_pipe_crc_entry *entry;
