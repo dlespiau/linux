@@ -1393,7 +1393,6 @@ typedef struct drm_i915_private {
 	/* Old dri1 support infrastructure, beware the dragons ya fools entering
 	 * here! */
 	struct i915_dri1_state dri1;
-
 	/* Old ums support infrastructure, same warning applies. */
 	struct i915_ums_state ums;
 
