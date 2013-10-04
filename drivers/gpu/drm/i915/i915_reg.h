@@ -1858,7 +1858,6 @@
 #define _PIPE_B_CH4_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x61070)
 #define _PIPE_B_CH5_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x61074)
 
-
 /* Pipe C CRC regs */
 #define _PIPE_CRC_CTL_C	(dev_priv->info->display_mmio_offset + 0x62050)
 #define _PIPE_C_CH1_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x62064)
@@ -1867,12 +1866,17 @@
 #define _PIPE_C_CH4_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x62070)
 #define _PIPE_C_CH5_CRC_RESULT	(dev_priv->info->display_mmio_offset + 0x62074)
 
-#define PIPE_CRC_CTL	_PIPE(pipe, _PIPE_CRC_CTL_A, _PIPE_CRC_CTL_C)
-#define PIPE_CH1_CRC_RESULT	_PIPE(pipe, _PIPE_A_CH1_CRC_RESULT, _PIPE_C_CH1_CRC_RESULT)
-#define PIPE_CH2_CRC_RESULT	_PIPE(pipe, _PIPE_A_CH2_CRC_RESULT, _PIPE_C_CH2_CRC_RESULT)
-#define PIPE_CH3_CRC_RESULT	_PIPE(pipe, _PIPE_A_CH3_CRC_RESULT, _PIPE_C_CH3_CRC_RESULT)
-#define PIPE_CH4_CRC_RESULT	_PIPE(pipe, _PIPE_A_CH4_CRC_RESULT, _PIPE_C_CH4_CRC_RESULT)
-#define PIPE_CH5_CRC_RESULT	_PIPE(pipe, _PIPE_A_CH5_CRC_RESULT, _PIPE_C_CH5_CRC_RESULT)
+#define PIPE_CRC_CTL(pipe)	_PIPE(pipe, _PIPE_CRC_CTL_A, _PIPE_CRC_CTL_C)
+#define PIPE_CH1_CRC_RESULT(pipe)	\
+	_PIPE(pipe, _PIPE_A_CH1_CRC_RESULT, _PIPE_C_CH1_CRC_RESULT)
+#define PIPE_CH2_CRC_RESULT(pipe)	\
+	_PIPE(pipe, _PIPE_A_CH2_CRC_RESULT, _PIPE_C_CH2_CRC_RESULT)
+#define PIPE_CH3_CRC_RESULT(pipe)	\
+	_PIPE(pipe, _PIPE_A_CH3_CRC_RESULT, _PIPE_C_CH3_CRC_RESULT)
+#define PIPE_CH4_CRC_RESULT(pipe)	\
+	_PIPE(pipe, _PIPE_A_CH4_CRC_RESULT, _PIPE_C_CH4_CRC_RESULT)
+#define PIPE_CH5_CRC_RESULT(pipe)	\
+	_PIPE(pipe, _PIPE_A_CH5_CRC_RESULT, _PIPE_C_CH5_CRC_RESULT)
 
 /* Pipe A timing regs */
 #define _HTOTAL_A	(dev_priv->info->display_mmio_offset + 0x60000)
