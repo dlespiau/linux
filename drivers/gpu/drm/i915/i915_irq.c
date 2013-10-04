@@ -1103,11 +1103,11 @@ static void pipe_update_crc(struct drm_device *dev, int pipe)
 	ts = ktime_to_us(now);
 	tslot = (atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe]) + 1) % 200;
 	dev_priv->drm_i915_pipe_timestamp[pipe][tslot] = ts;
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][0] = I915_READ(PIPE_CH1_CRC_RESULT(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][1] = I915_READ(PIPE_CH2_CRC_RESULT(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][2] = I915_READ(PIPE_CH3_CRC_RESULT(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][3] = I915_READ(PIPE_CH4_CRC_RESULT(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][4] = I915_READ(PIPE_CH5_CRC_RESULT(pipe));
+	dev_priv->drm_i915_pipe_crc[pipe][tslot][0] = I915_READ(PIPE_CRC_RES_1_IVB(pipe));
+	dev_priv->drm_i915_pipe_crc[pipe][tslot][1] = I915_READ(PIPE_CRC_RES_2_IVB(pipe));
+	dev_priv->drm_i915_pipe_crc[pipe][tslot][2] = I915_READ(PIPE_CRC_RES_3_IVB(pipe));
+	dev_priv->drm_i915_pipe_crc[pipe][tslot][3] = I915_READ(PIPE_CRC_RES_4_IVB(pipe));
+	dev_priv->drm_i915_pipe_crc[pipe][tslot][4] = I915_READ(PIPE_CRC_RES_5_IVB(pipe));
 	atomic_set(&dev_priv->drm_i915_pipe_crc_current[pipe], tslot);
 }
 #else
