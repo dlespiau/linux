@@ -1096,19 +1096,22 @@ static void dp_aux_irq_handler(struct drm_device *dev)
 static void ivb_pipe_update_crc(struct drm_device *dev, int pipe)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
+	struct i915_pipe_crc_entry *entry;
 	ktime_t now;
-	int ts, tslot;
+	int ts, slot;
 
 	now = ktime_get();
 	ts = ktime_to_us(now);
-	tslot = (atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe]) + 1) % 200;
-	dev_priv->drm_i915_pipe_timestamp[pipe][tslot] = ts;
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][0] = I915_READ(PIPE_CRC_RES_1_IVB(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][1] = I915_READ(PIPE_CRC_RES_2_IVB(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][2] = I915_READ(PIPE_CRC_RES_3_IVB(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][3] = I915_READ(PIPE_CRC_RES_4_IVB(pipe));
-	dev_priv->drm_i915_pipe_crc[pipe][tslot][4] = I915_READ(PIPE_CRC_RES_5_IVB(pipe));
-	atomic_set(&dev_priv->drm_i915_pipe_crc_current[pipe], tslot);
+
+	slot = (atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1) % 200;
+	entry = &dev_priv->pipe_crc[pipe].entries[slot];
+	entry->timestamp = ts;
+	entry->crc[0] = I915_READ(PIPE_CRC_RES_1_IVB(pipe));
+	entry->crc[1] = I915_READ(PIPE_CRC_RES_2_IVB(pipe));
+	entry->crc[2] = I915_READ(PIPE_CRC_RES_3_IVB(pipe));
+	entry->crc[3] = I915_READ(PIPE_CRC_RES_4_IVB(pipe));
+	entry->crc[4] = I915_READ(PIPE_CRC_RES_5_IVB(pipe));
+	atomic_set(&dev_priv->pipe_crc[pipe].slot, slot);
 }
 #else
 static void ivb_pipe_update_crc(struct drm_device *dev, int pipe) {}

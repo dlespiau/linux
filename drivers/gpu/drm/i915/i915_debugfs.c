@@ -2212,16 +2212,15 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 		return 0;
 	}
 
-	start = atomic_read(&dev_priv->drm_i915_pipe_crc_current[pipe])+1;
+	start = atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1;
 	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
 	for (i = 0; i < 200; i++) {
-		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n",
-			dev_priv->drm_i915_pipe_timestamp[pipe][(start+i)%200],
-			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][0],
-			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][1],
-			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][2],
-			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][3],
-			dev_priv->drm_i915_pipe_crc[pipe][(start+i)%200][4]);
+		struct i915_pipe_crc_entry *entry =
+			&dev_priv->pipe_crc[pipe].entries[(start + i) % 200];
+
+		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n", entry->timestamp,
+			   entry->crc[0], entry->crc[1], entry->crc[2],
+			   entry->crc[3], entry->crc[4]);
 	}
 
 	return 0;

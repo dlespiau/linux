@@ -1196,6 +1196,11 @@ struct i915_package_c8 {
 	} regsave;
 };
 
+struct i915_pipe_crc_entry {
+	uint32_t timestamp;
+	uint32_t crc[5];
+};
+
 typedef struct drm_i915_private {
 	struct drm_device *dev;
 	struct kmem_cache *slab;
@@ -1397,9 +1402,11 @@ typedef struct drm_i915_private {
 	struct i915_ums_state ums;
 
 #ifdef CONFIG_DEBUG_FS
-	uint32_t drm_i915_pipe_timestamp[I915_MAX_PIPES][200];
-	uint32_t drm_i915_pipe_crc[I915_MAX_PIPES][200][5];
-	atomic_t drm_i915_pipe_crc_current[I915_MAX_PIPES];
+#define I915_PIPE_CRC_ENTRIES_NR	200
+	struct {
+		struct i915_pipe_crc_entry entries[I915_PIPE_CRC_ENTRIES_NR];
+		atomic_t slot;
+	} pipe_crc[I915_MAX_PIPES];
 #endif
 } drm_i915_private_t;
 
