@@ -1399,9 +1399,9 @@ typedef struct drm_i915_private {
 
 #ifdef CONFIG_DEBUG_FS
 	bool drm_i915_pipe_crc_enabled;
-	uint32_t drm_i915_pipe_timestamp[3][200];
-	uint32_t drm_i915_pipe_crc[3][200][5];
-	atomic_t drm_i915_pipe_crc_current[3];
+	uint32_t drm_i915_pipe_timestamp[I915_MAX_PIPES][200];
+	uint32_t drm_i915_pipe_crc[I915_MAX_PIPES][200][5];
+	atomic_t drm_i915_pipe_crc_current[I915_MAX_PIPES];
 #endif
 } drm_i915_private_t;
 
