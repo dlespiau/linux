@@ -1196,6 +1196,14 @@ struct i915_package_c8 {
 	} regsave;
 };
 
+enum intel_pipe_crc_source {
+	INTEL_PIPE_CRC_SOURCE_NONE,
+	INTEL_PIPE_CRC_SOURCE_PLANE1,
+	INTEL_PIPE_CRC_SOURCE_PLANE2,
+	INTEL_PIPE_CRC_SOURCE_PF,
+	INTEL_PIPE_CRC_SOURCE_MAX,
+};
+
 struct intel_pipe_crc_entry {
 	uint32_t timestamp;
 	uint32_t crc[5];
