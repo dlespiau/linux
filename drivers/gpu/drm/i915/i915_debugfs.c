@@ -1730,6 +1730,34 @@ static int i915_pc8_status(struct seq_file *m, void *unused)
 	return 0;
 }
 
+static int i915_pipe_crc(struct seq_file *m, void *data)
+{
+	struct drm_info_node *node = (struct drm_info_node *) m->private;
+	struct drm_device *dev = node->minor->dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
+	enum pipe pipe = (enum pipe)node->info_ent->data;
+	int i;
+	int start;
+
+	if (!IS_IVYBRIDGE(dev)) {
+		seq_puts(m, "unsupported\n");
+		return 0;
+	}
+
+	start = atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1;
+	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
+	for (i = 0; i < 200; i++) {
+		struct i915_pipe_crc_entry *entry =
+			&dev_priv->pipe_crc[pipe].entries[(start + i) % 200];
+
+		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n", entry->timestamp,
+			   entry->crc[0], entry->crc[1], entry->crc[2],
+			   entry->crc[3], entry->crc[4]);
+	}
+
+	return 0;
+}
+
 static int
 i915_wedged_get(void *data, u64 *val)
 {
@@ -2197,35 +2225,6 @@ static int i915_debugfs_create(struct dentry *root,
 
 	return drm_add_fake_info_node(minor, ent, fops);
 }
-
-static int i915_pipe_crc(struct seq_file *m, void *data)
-{
-	struct drm_info_node *node = (struct drm_info_node *) m->private;
-	struct drm_device *dev = node->minor->dev;
-	struct drm_i915_private *dev_priv = dev->dev_private;
-	enum pipe pipe = (enum pipe)node->info_ent->data;
-	int i;
-	int start;
-
-	if (!IS_IVYBRIDGE(dev)) {
-		seq_puts(m, "unsupported\n");
-		return 0;
-	}
-
-	start = atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1;
-	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
-	for (i = 0; i < 200; i++) {
-		struct i915_pipe_crc_entry *entry =
-			&dev_priv->pipe_crc[pipe].entries[(start + i) % 200];
-
-		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n", entry->timestamp,
-			   entry->crc[0], entry->crc[1], entry->crc[2],
-			   entry->crc[3], entry->crc[4]);
-	}
-
-	return 0;
-}
-
 
 static struct drm_info_list i915_debugfs_list[] = {
 	{"i915_capabilities", i915_capabilities, 0},
