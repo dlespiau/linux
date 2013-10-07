@@ -1114,6 +1114,8 @@ static void ivb_pipe_crc_update(struct drm_device *dev, enum pipe pipe)
 		return;
 	}
 
+	DRM_DEBUG_DRIVER("XXX: Put entry %d\n", head);
+
 	entry = &pipe_crc->entries[head];
 
 	entry->frame = I915_READ(PIPEFRAME(pipe));

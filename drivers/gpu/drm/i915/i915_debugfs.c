@@ -1770,12 +1770,16 @@ static int i915_pipe_crc_open(struct inode *inode, struct file *filep)
 	struct drm_i915_private *dev_priv = info->dev->dev_private;
 	struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[info->pipe];
 
+	DRM_DEBUG_DRIVER("XXX: avail: %d\n", atomic_read(&pipe_crc->available));
+
 	if (!atomic_dec_and_test(&pipe_crc->available)) {
 		atomic_inc(&pipe_crc->available);
 		return -EBUSY; /* already open */
 	}
 
 	filep->private_data = inode->i_private;
+
+	DRM_DEBUG_DRIVER("XXX: dev_priv(%p)\n", dev_priv);
 
 	return 0;
 }
@@ -1833,6 +1837,8 @@ i915_pipe_crc_read(struct file *filep, char __user *user_buf, size_t count,
 		if (filep->f_flags & O_NONBLOCK)
 			return -EAGAIN;
 
+		DRM_DEBUG_DRIVER("XXX: Waiting for CRCs\n");
+
 		if (wait_event_interruptible(pipe_crc->wq,
 					     pipe_crc_data_count(pipe_crc)))
 			 return -ERESTARTSYS;
@@ -1848,6 +1854,8 @@ i915_pipe_crc_read(struct file *filep, char __user *user_buf, size_t count,
 	do {
 		struct intel_pipe_crc_entry *entry = &pipe_crc->entries[tail];
 		int ret;
+
+		DRM_DEBUG_DRIVER("XXX: Get entry %d\n", tail);
 
 		bytes_read += snprintf(buf, PIPE_CRC_BUFFER_LEN,
 				       "%8u %8x %8x %8x %8x %8x\n",
@@ -1926,6 +1934,8 @@ static int display_crc_ctl_show(struct seq_file *m, void *data)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	int i;
 
+	DRM_DEBUG_DRIVER("XXX: dev_priv(%p)\n", dev_priv);
+
 	for (i = 0; i < I915_MAX_PIPES; i++)
 		seq_printf(m, "%c %s\n", pipe_name(i),
 			   pipe_crc_source_name(dev_priv->pipe_crc[i].source));
@@ -1946,6 +1956,10 @@ static int pipe_crc_set_source(struct drm_device *dev, enum pipe pipe,
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[pipe];
 	u32 val;
+
+
+	DRM_DEBUG_DRIVER("XXX: Set source pipe %c, %s\n", pipe_name(pipe),
+			 pipe_crc_source_name(source));
 
 	if (!IS_IVYBRIDGE(dev))
 		return -ENODEV;
@@ -2112,10 +2126,15 @@ static int display_crc_ctl_parse(struct drm_device *dev, char *buf, size_t len)
 		return -EINVAL;
 	}
 
+	DRM_DEBUG_DRIVER("XXX: parsed %s %s %s\n", words[0], words[1],
+			 words[2]);
+
 	if (display_crc_ctl_parse_object(words[0], &object) < 0) {
 		DRM_DEBUG_DRIVER("unknown object %s\n", words[0]);
 		return -EINVAL;
 	}
+
+	DRM_DEBUG_DRIVER("XXX: parsed %s %s\n", words[0], words[1]);
 
 	if (display_crc_ctl_parse_pipe(words[1], &pipe) < 0) {
 		DRM_DEBUG_DRIVER("unknown pipe %s\n", words[1]);
@@ -2135,8 +2154,11 @@ static ssize_t display_crc_ctl_write(struct file *file, const char __user *ubuf,
 {
 	struct seq_file *m = file->private_data;
 	struct drm_device *dev = m->private;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	char *tmpbuf;
 	int ret;
+
+	DRM_DEBUG_DRIVER("XXX: dev_priv(%p)\n", dev_priv);
 
 	if (len == 0)
 		return 0;
@@ -2685,6 +2707,8 @@ void intel_display_crc_init(struct drm_device *dev)
 
 	for (i = 0; i < INTEL_INFO(dev)->num_pipes; i++) {
 		struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[i];
+
+		DRM_DEBUG_DRIVER("XXX: avail set to 1\n");
 
 		atomic_set(&pipe_crc->available, 1);
 		init_waitqueue_head(&pipe_crc->wq);
