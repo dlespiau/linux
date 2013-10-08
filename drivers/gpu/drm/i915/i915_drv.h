@@ -1201,6 +1201,13 @@ struct intel_pipe_crc_entry {
 	uint32_t crc[5];
 };
 
+#define INTEL_PIPE_CRC_ENTRIES_NR	200
+struct intel_pipe_crc {
+	struct intel_pipe_crc_entry entries[INTEL_PIPE_CRC_ENTRIES_NR];
+	enum intel_pipe_crc_source source;
+	atomic_t slot;
+};
+
 typedef struct drm_i915_private {
 	struct drm_device *dev;
 	struct kmem_cache *slab;
@@ -1402,12 +1409,7 @@ typedef struct drm_i915_private {
 	struct i915_ums_state ums;
 
 #ifdef CONFIG_DEBUG_FS
-#define INTEL_PIPE_CRC_ENTRIES_NR	200
-	struct {
-		struct intel_pipe_crc_entry entries[INTEL_PIPE_CRC_ENTRIES_NR];
-		enum intel_pipe_crc_source source;
-		atomic_t slot;
-	} pipe_crc[I915_MAX_PIPES];
+	struct intel_pipe_crc pipe_crc[I915_MAX_PIPES];
 #endif
 } drm_i915_private_t;
 
