@@ -1093,7 +1093,7 @@ static void dp_aux_irq_handler(struct drm_device *dev)
 }
 
 #if defined(CONFIG_DEBUG_FS)
-static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
+static void ivb_pipe_crc_update(struct drm_device *dev, enum pipe pipe)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[pipe];
@@ -1115,7 +1115,7 @@ static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
 	atomic_set(&dev_priv->pipe_crc[pipe].slot, slot);
 }
 #else
-static void ivb_pipe_update_crc(struct drm_device *dev, int pipe) {}
+static void ivb_pipe_crc_update(struct drm_device *dev, int pipe) {}
 #endif
 
 /* The RPS events need forcewake, so we add them to a work queue and mask their
@@ -1297,13 +1297,13 @@ static void ivb_err_int_handler(struct drm_device *dev)
 			DRM_DEBUG_DRIVER("Pipe C FIFO underrun\n");
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_A)
-		ivb_pipe_update_crc(dev, PIPE_A);
+		ivb_pipe_crc_update(dev, PIPE_A);
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_B)
-		ivb_pipe_update_crc(dev, PIPE_B);
+		ivb_pipe_crc_update(dev, PIPE_B);
 
 	if (err_int & ERR_INT_PIPE_CRC_DONE_C)
-		ivb_pipe_update_crc(dev, PIPE_C);
+		ivb_pipe_crc_update(dev, PIPE_C);
 
 	I915_WRITE(GEN7_ERR_INT, err_int);
 }
