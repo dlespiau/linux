@@ -1096,6 +1096,7 @@ static void dp_aux_irq_handler(struct drm_device *dev)
 static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
+	struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[pipe];
 	struct intel_pipe_crc_entry *entry;
 	ktime_t now;
 	int ts, slot;
@@ -1103,8 +1104,8 @@ static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
 	now = ktime_get();
 	ts = ktime_to_us(now);
 
-	slot = (atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1) % 200;
-	entry = &dev_priv->pipe_crc[pipe].entries[slot];
+	slot = (atomic_read(&pipe_crc->slot) + 1) % 200;
+	entry = &pipe_crc->entries[slot];
 	entry->timestamp = ts;
 	entry->crc[0] = I915_READ(PIPE_CRC_RES_1_IVB(pipe));
 	entry->crc[1] = I915_READ(PIPE_CRC_RES_2_IVB(pipe));

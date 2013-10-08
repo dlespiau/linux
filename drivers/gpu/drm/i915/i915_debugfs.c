@@ -1736,6 +1736,7 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 	struct drm_device *dev = node->minor->dev;
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	enum pipe pipe = (enum pipe)node->info_ent->data;
+	const struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[pipe];
 	int i;
 	int start;
 
@@ -1744,7 +1745,7 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 		return 0;
 	}
 
-	start = atomic_read(&dev_priv->pipe_crc[pipe].slot) + 1;
+	start = atomic_read(&pipe_crc->slot) + 1;
 	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
 	for (i = 0; i < 200; i++) {
 		struct intel_pipe_crc_entry *entry =
