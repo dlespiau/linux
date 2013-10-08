@@ -1196,7 +1196,7 @@ struct i915_package_c8 {
 	} regsave;
 };
 
-struct i915_pipe_crc_entry {
+struct intel_pipe_crc_entry {
 	uint32_t timestamp;
 	uint32_t crc[5];
 };
@@ -1402,9 +1402,10 @@ typedef struct drm_i915_private {
 	struct i915_ums_state ums;
 
 #ifdef CONFIG_DEBUG_FS
-#define I915_PIPE_CRC_ENTRIES_NR	200
+#define INTEL_PIPE_CRC_ENTRIES_NR	200
 	struct {
-		struct i915_pipe_crc_entry entries[I915_PIPE_CRC_ENTRIES_NR];
+		struct intel_pipe_crc_entry entries[INTEL_PIPE_CRC_ENTRIES_NR];
+		enum intel_pipe_crc_source source;
 		atomic_t slot;
 	} pipe_crc[I915_MAX_PIPES];
 #endif
