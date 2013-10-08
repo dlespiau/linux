@@ -1747,9 +1747,10 @@ static int i915_pipe_crc(struct seq_file *m, void *data)
 
 	start = atomic_read(&pipe_crc->slot) + 1;
 	seq_puts(m, " timestamp     CRC1     CRC2     CRC3     CRC4     CRC5\n");
-	for (i = 0; i < 200; i++) {
-		struct intel_pipe_crc_entry *entry =
-			&dev_priv->pipe_crc[pipe].entries[(start + i) % 200];
+	for (i = 0; i < INTEL_PIPE_CRC_ENTRIES_NR; i++) {
+		const struct intel_pipe_crc_entry *entry =
+			&pipe_crc->entries[(start + i) %
+					   INTEL_PIPE_CRC_ENTRIES_NR];
 
 		seq_printf(m, "%12u %8x %8x %8x %8x %8x\n", entry->timestamp,
 			   entry->crc[0], entry->crc[1], entry->crc[2],

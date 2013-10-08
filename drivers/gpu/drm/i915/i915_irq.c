@@ -1104,7 +1104,7 @@ static void ivb_pipe_update_crc(struct drm_device *dev, enum pipe pipe)
 	now = ktime_get();
 	ts = ktime_to_us(now);
 
-	slot = (atomic_read(&pipe_crc->slot) + 1) % 200;
+	slot = (atomic_read(&pipe_crc->slot) + 1) % INTEL_PIPE_CRC_ENTRIES_NR;
 	entry = &pipe_crc->entries[slot];
 	entry->timestamp = ts;
 	entry->crc[0] = I915_READ(PIPE_CRC_RES_1_IVB(pipe));
