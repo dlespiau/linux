@@ -1825,14 +1825,8 @@ i915_pipe_crc_read(struct file *filep, char __user *user_buf, size_t count,
 	if (count < PIPE_CRC_LINE_LEN)
 		return -EINVAL;
 
-	if (pipe_crc->source == INTEL_PIPE_CRC_SOURCE_NONE) {
-		loff_t dummy = 0;
-
-		strcpy(buf, "none\n");
-		bytes_read = simple_read_from_buffer(user_buf, count, &dummy,
-						     buf, sizeof("none\n" - 1));
-		return bytes_read;
-	}
+	if (pipe_crc->source == INTEL_PIPE_CRC_SOURCE_NONE)
+		return 0;
 
 	/* nothing to read */
 	while (pipe_crc_data_count(pipe_crc) == 0) {
