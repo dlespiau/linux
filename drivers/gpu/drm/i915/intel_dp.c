@@ -621,7 +621,10 @@ static uint32_t ilk_get_aux_clock_divider(struct intel_dp *intel_dp, int index)
 	struct intel_digital_port *intel_dig_port = dp_to_dig_port(intel_dp);
 	struct drm_device *dev = intel_dig_port->base.base.dev;
 
-	if (index)
+	if (INTEL_INFO(dev)->gen >= 9) {
+		/* Skylake doesn't need the AUX clock divider programmed */
+		return 0;
+	} else if (index)
 		return 0;
 
 	if (intel_dig_port->port == PORT_A) {
