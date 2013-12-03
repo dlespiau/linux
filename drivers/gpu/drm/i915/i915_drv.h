@@ -2185,6 +2185,8 @@ struct drm_i915_cmd_table {
 #define HAS_PSR(dev)		(IS_HASWELL(dev) || IS_BROADWELL(dev))
 #define HAS_RUNTIME_PM(dev)	(IS_GEN6(dev) || IS_HASWELL(dev) || \
 				 IS_BROADWELL(dev) || IS_VALLEYVIEW(dev))
+#define HAS_FDI(dev)		(HAS_PCH_SPLIT(dev) && \
+				 INTEL_INFO(dev)->gen < 9)
 
 #define INTEL_PCH_DEVICE_ID_MASK		0xff00
 #define INTEL_PCH_IBX_DEVICE_ID_TYPE		0x3b00
