@@ -1480,6 +1480,9 @@ intel_device_info_init(struct drm_i915_private *dev_priv,
  *   - it's judged too laborious to fill n static structures with the limit
  *     when a simple if statement does the job,
  *   - run-time checks (eg read fuse/strap registers) are needed.
+ *
+ * This function needs to be called after the MMIO has been setup as we are
+ * reading registers, and before the first usage of the fields it can tweak.
  */
 static void intel_device_info_runtime_init(struct drm_device *dev)
 {
@@ -1495,6 +1498,18 @@ static void intel_device_info_runtime_init(struct drm_device *dev)
 	info->num_sprites = 1;
 	if (IS_VALLEYVIEW(dev))
 		info->num_sprites = 2;
+
+	if ((dev_priv->info.gen == 7 || dev_priv->info.gen == 8) &&
+	    !IS_VALLEYVIEW(dev)) {
+		u32 fuse_strap = I915_READ(FUSE_STRAP);
+		u32 sfuse_strap = I915_READ(SFUSE_STRAP);
+
+		if (fuse_strap & ILK_INTERNAL_DISPLAY_DISABLE ||
+		    sfuse_strap & SFUSE_STRAP_DISPLAY_DISABLED) {
+			DRM_DEBUG_DRIVER("Display fused off, disabling\n");
+			info->num_pipes = 0;
+		}
+	}
 }
 
 /**
