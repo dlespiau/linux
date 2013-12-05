@@ -41,12 +41,6 @@
 	0x030000, 0xff0000,			\
 	(unsigned long) info }
 
-#define INTEL_QUANTA_VGA_DEVICE(info) {		\
-	0x8086,	0x16a,				\
-	0x152d,	0x8990,				\
-	0x030000, 0xff0000,			\
-	(unsigned long) info }
-
 #define INTEL_I830_IDS(info)				\
 	INTEL_VGA_DEVICE(0x3577, info)
 
@@ -130,9 +124,6 @@
 	INTEL_VGA_DEVICE(0x0162, info), /* GT2 desktop */ \
 	INTEL_VGA_DEVICE(0x015a, info), /* GT1 server */ \
 	INTEL_VGA_DEVICE(0x016a, info)  /* GT2 server */
-
-#define INTEL_IVB_Q_IDS(info) \
-	INTEL_QUANTA_VGA_DEVICE(info) /* Quanta transcode */
 
 #define INTEL_HSW_D_IDS(info) \
 	INTEL_VGA_DEVICE(0x0402, info), /* GT1 desktop */ \

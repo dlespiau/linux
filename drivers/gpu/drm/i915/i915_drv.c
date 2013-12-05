@@ -299,12 +299,6 @@ static const struct intel_device_info intel_ivybridge_m_info = {
 	.is_mobile = 1,
 };
 
-static const struct intel_device_info intel_ivybridge_q_info = {
-	GEN7_FEATURES,
-	.is_ivybridge = 1,
-	.num_pipes = 0, /* legal, last one wins */
-};
-
 static const struct intel_device_info intel_valleyview_m_info = {
 	GEN7_FEATURES,
 	.is_mobile = 1,
@@ -359,12 +353,6 @@ static const struct intel_device_info intel_broadwell_m_info = {
 	.has_ddi = 1,
 };
 
-/*
- * Make sure any device matches here are from most specific to most
- * general.  For example, since the Quanta match is based on the subsystem
- * and subvendor IDs, we need it to come before the more general IVB
- * PCI ID matches, otherwise we'll use the wrong info struct above.
- */
 #define INTEL_PCI_IDS \
 	INTEL_I830_IDS(&intel_i830_info),	\
 	INTEL_I845G_IDS(&intel_845g_info),	\
@@ -384,7 +372,6 @@ static const struct intel_device_info intel_broadwell_m_info = {
 	INTEL_IRONLAKE_M_IDS(&intel_ironlake_m_info),	\
 	INTEL_SNB_D_IDS(&intel_sandybridge_d_info),	\
 	INTEL_SNB_M_IDS(&intel_sandybridge_m_info),	\
-	INTEL_IVB_Q_IDS(&intel_ivybridge_q_info), /* must be first IVB */ \
 	INTEL_IVB_M_IDS(&intel_ivybridge_m_info),	\
 	INTEL_IVB_D_IDS(&intel_ivybridge_d_info),	\
 	INTEL_HSW_D_IDS(&intel_haswell_d_info), \
