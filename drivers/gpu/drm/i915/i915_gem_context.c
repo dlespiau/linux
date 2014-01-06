@@ -113,7 +113,7 @@ static int get_context_size(struct drm_device *dev)
 	int ret;
 	u32 reg;
 
-	switch (dev_priv->info->gen) {
+	switch (dev_priv->info.gen) {
 	case 6:
 		reg = I915_READ(CXT_SIZE);
 		ret = GEN6_CXT_TOTAL_SIZE(reg) * 64;
@@ -195,7 +195,7 @@ __create_hw_context(struct drm_device *dev,
 		return ERR_PTR(-ENOMEM);
 	}
 
-	if (dev_priv->info->gen >= 7) {
+	if (dev_priv->info.gen >= 7) {
 		ret = i915_gem_object_set_cache_level(ctx->obj,
 						      I915_CACHE_L3_LLC);
 		/* Failure shouldn't ever happen this early */
@@ -319,7 +319,7 @@ void i915_gem_context_reset(struct drm_device *dev)
 	 * the next switch */
 	for (i = 0; i < I915_NUM_RINGS; i++) {
 		struct i915_hw_context *dctx;
-		if (!(dev_priv->info->ring_mask & (1<<i)))
+		if (!(dev_priv->info.ring_mask & (1<<i)))
 			continue;
 
 		/* Do a fake switch to the default context */
@@ -380,7 +380,7 @@ int i915_gem_context_init(struct drm_device *dev)
 	}
 
 	for (i = RCS + 1; i < I915_NUM_RINGS; i++) {
-		if (!(dev_priv->info->ring_mask & (1<<i)))
+		if (!(dev_priv->info.ring_mask & (1<<i)))
 			continue;
 
 		ring = &dev_priv->ring[i];
@@ -424,7 +424,7 @@ void i915_gem_context_fini(struct drm_device *dev)
 
 	for (i = 0; i < I915_NUM_RINGS; i++) {
 		struct intel_ring_buffer *ring = &dev_priv->ring[i];
-		if (!(dev_priv->info->ring_mask & (1<<i)))
+		if (!(dev_priv->info.ring_mask & (1<<i)))
 			continue;
 
 		if (ring->last_context)

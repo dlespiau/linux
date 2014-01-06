@@ -107,7 +107,7 @@ static void i915_write_hws_pga(struct drm_device *dev)
 	u32 addr;
 
 	addr = dev_priv->status_page_dmah->busaddr;
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		addr |= (dev_priv->status_page_dmah->busaddr >> 28) & 0xf0;
 	I915_WRITE(HWS_PGA, addr);
 }
@@ -399,7 +399,7 @@ i915_emit_box(struct drm_device *dev,
 		return -EINVAL;
 	}
 
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		ret = BEGIN_LP_RING(4);
 		if (ret)
 			return ret;
@@ -512,7 +512,7 @@ static int i915_dispatch_batchbuffer(struct drm_device * dev,
 			if (ret)
 				return ret;
 
-			if (dev_priv->info->gen >= 4) {
+			if (dev_priv->info.gen >= 4) {
 				OUT_RING(MI_BATCH_BUFFER_START | (2 << 6) | MI_BATCH_NON_SECURE_I965);
 				OUT_RING(batch->start);
 			} else {
@@ -975,7 +975,7 @@ static int i915_getparam(struct drm_device *dev, void *data,
 		value = 1;
 		break;
 	case I915_PARAM_HAS_EXEC_CONSTANTS:
-		value = dev_priv->info->gen >= 4;
+		value = dev_priv->info.gen >= 4;
 		break;
 	case I915_PARAM_HAS_RELAXED_DELTA:
 		value = 1;
@@ -1133,12 +1133,12 @@ static int
 intel_alloc_mchbar_resource(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
-	int reg = dev_priv->info->gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
+	int reg = dev_priv->info.gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
 	u32 temp_lo, temp_hi = 0;
 	u64 mchbar_addr;
 	int ret;
 
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		pci_read_config_dword(dev_priv->bridge_dev, reg + 4, &temp_hi);
 	pci_read_config_dword(dev_priv->bridge_dev, reg, &temp_lo);
 	mchbar_addr = ((u64)temp_hi << 32) | temp_lo;
@@ -1165,7 +1165,7 @@ intel_alloc_mchbar_resource(struct drm_device *dev)
 		return ret;
 	}
 
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		pci_write_config_dword(dev_priv->bridge_dev, reg + 4,
 				       upper_32_bits(dev_priv->mch_res.start));
 
@@ -1179,7 +1179,7 @@ static void
 intel_setup_mchbar(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
-	int mchbar_reg = dev_priv->info->gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
+	int mchbar_reg = dev_priv->info.gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
 	u32 temp;
 	bool enabled;
 
@@ -1216,7 +1216,7 @@ static void
 intel_teardown_mchbar(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
-	int mchbar_reg = dev_priv->info->gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
+	int mchbar_reg = dev_priv->info.gen >= 4 ? MCHBAR_I965 : MCHBAR_I915;
 	u32 temp;
 
 	if (dev_priv->mchbar_need_disable) {
@@ -1338,7 +1338,7 @@ static int i915_load_modeset_init(struct drm_device *dev)
 	/* Always safe in the mode setting case. */
 	/* FIXME: do pre/post-mode set stuff in core KMS code */
 	dev->vblank_disable_allowed = true;
-	if (dev_priv->info->num_pipes == 0) {
+	if (dev_priv->info.num_pipes == 0) {
 		intel_display_power_put(dev, POWER_DOMAIN_VGA);
 		return 0;
 	}
@@ -1442,7 +1442,7 @@ static void i915_kick_out_firmware_fb(struct drm_i915_private *dev_priv)
 
 static void i915_dump_device_info(struct drm_i915_private *dev_priv)
 {
-	const struct intel_device_info *info = dev_priv->info;
+	const struct intel_device_info *info = &dev_priv->info;
 
 #define PRINT_S(name) "%s"
 #define SEP_EMPTY
@@ -1457,6 +1457,20 @@ static void i915_dump_device_info(struct drm_i915_private *dev_priv)
 #undef SEP_EMPTY
 #undef PRINT_FLAG
 #undef SEP_COMMA
+}
+
+static void
+intel_device_info_init(struct drm_i915_private *dev_priv,
+		       const struct intel_device_info *start_info)
+{
+	struct intel_device_info *info;
+
+	/*
+	 * dev_priv->info is const for the rest of the driver but we make
+	 * an exception here to copy the initial configuration.
+	 */
+	info = (struct intel_device_info *)&dev_priv->info;
+	memcpy(info, start_info, sizeof(*info));
 }
 
 /**
@@ -1496,7 +1510,8 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 
 	dev->dev_private = (void *)dev_priv;
 	dev_priv->dev = dev;
-	dev_priv->info = info;
+
+	intel_device_info_init(dev_priv, info);
 
 	spin_lock_init(&dev_priv->irq_lock);
 	spin_lock_init(&dev_priv->gpu_error.lock);
@@ -1639,8 +1654,8 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 	if (IS_VALLEYVIEW(dev))
 		dev_priv->num_plane = 2;
 
-	if (dev_priv->info->num_pipes) {
-		ret = drm_vblank_init(dev, dev_priv->info->num_pipes);
+	if (dev_priv->info.num_pipes) {
+		ret = drm_vblank_init(dev, dev_priv->info.num_pipes);
 		if (ret)
 			goto out_gem_unload;
 	}
@@ -1660,7 +1675,7 @@ int i915_driver_load(struct drm_device *dev, unsigned long flags)
 
 	i915_setup_sysfs(dev);
 
-	if (dev_priv->info->num_pipes) {
+	if (dev_priv->info.num_pipes) {
 		/* Must be done after probing outputs */
 		intel_opregion_init(dev);
 		acpi_video_register();

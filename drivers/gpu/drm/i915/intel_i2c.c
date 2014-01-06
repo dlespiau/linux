@@ -264,7 +264,7 @@ intel_gpio_setup(struct intel_gmbus *bus, u32 pin)
  * shared with another device. The kernel then disables that interrupt source
  * and so prevents the other device from working properly.
  */
-#define HAS_GMBUS_IRQ(dev) (dev_priv->info->gen >= 5)
+#define HAS_GMBUS_IRQ(dev) (dev_priv->info.gen >= 5)
 static int
 gmbus_wait_hw_status(struct drm_i915_private *dev_priv,
 		     u32 gmbus2_status,

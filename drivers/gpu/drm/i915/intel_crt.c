@@ -185,7 +185,7 @@ static void intel_crt_dpms(struct drm_connector *connector, int mode)
 	int old_dpms;
 
 	/* PCH platforms and VLV only support on/off. */
-	if (dev_priv->info->gen >= 5 && mode != DRM_MODE_DPMS_ON)
+	if (dev_priv->info.gen >= 5 && mode != DRM_MODE_DPMS_ON)
 		mode = DRM_MODE_DPMS_OFF;
 
 	if (mode == connector->dpms)
@@ -276,7 +276,7 @@ static void intel_crt_mode_set(struct intel_encoder *encoder)
 	struct drm_display_mode *adjusted_mode = &crtc->config.adjusted_mode;
 	u32 adpa;
 
-	if (dev_priv->info->gen >= 5)
+	if (dev_priv->info.gen >= 5)
 		adpa = ADPA_HOTPLUG_BITS;
 	else
 		adpa = 0;
@@ -713,7 +713,7 @@ static void intel_crt_reset(struct drm_connector *connector)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_crt *crt = intel_attached_crt(connector);
 
-	if (dev_priv->info->gen >= 5) {
+	if (dev_priv->info.gen >= 5) {
 		u32 adpa;
 
 		adpa = I915_READ(crt->adpa_reg);

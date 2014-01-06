@@ -81,7 +81,7 @@ static int i915_capabilities(struct seq_file *m, void *data)
 {
 	struct drm_info_node *node = (struct drm_info_node *) m->private;
 	struct drm_device *dev = node->minor->dev;
-	const struct intel_device_info *info = to_i915(dev)->info;
+	const struct intel_device_info *info = &to_i915(dev)->info;
 
 	seq_printf(m, "gen: %d\n", info->gen);
 	seq_printf(m, "pch: %d\n", INTEL_PCH_TYPE(dev));
@@ -601,7 +601,7 @@ static int i915_interrupt_info(struct seq_file *m, void *data)
 		return ret;
 	intel_runtime_pm_get(dev_priv);
 
-	if (dev_priv->info->gen >= 8) {
+	if (dev_priv->info.gen >= 8) {
 		int i;
 		seq_printf(m, "Master Interrupt Control:\t%08x\n",
 			   I915_READ(GEN8_MASTER_IRQ));
@@ -719,7 +719,7 @@ static int i915_interrupt_info(struct seq_file *m, void *data)
 	seq_printf(m, "Interrupts received: %d\n",
 		   atomic_read(&dev_priv->irq_received));
 	for_each_ring(ring, dev_priv, i) {
-		if (dev_priv->info->gen >= 6) {
+		if (dev_priv->info.gen >= 6) {
 			seq_printf(m,
 				   "Graphics Interrupt mask (%s):	%08x\n",
 				   ring->name, I915_READ_IMR(ring));
@@ -1667,7 +1667,7 @@ static int i915_swizzle_info(struct seq_file *m, void *data)
 			   I915_READ16(C0DRB3));
 		seq_printf(m, "C1DRB3 = 0x%04x\n",
 			   I915_READ16(C1DRB3));
-	} else if (dev_priv->info->gen >= 6) {
+	} else if (dev_priv->info.gen >= 6) {
 		seq_printf(m, "MAD_DIMM_C0 = 0x%08x\n",
 			   I915_READ(MAD_DIMM_C0));
 		seq_printf(m, "MAD_DIMM_C1 = 0x%08x\n",
@@ -1734,12 +1734,12 @@ static void gen6_ppgtt_info(struct seq_file *m, struct drm_device *dev)
 	struct drm_file *file;
 	int i;
 
-	if (dev_priv->info->gen == 6)
+	if (dev_priv->info.gen == 6)
 		seq_printf(m, "GFX_MODE: 0x%08x\n", I915_READ(GFX_MODE));
 
 	for_each_ring(ring, dev_priv, i) {
 		seq_printf(m, "%s\n", ring->name);
-		if (dev_priv->info->gen == 7)
+		if (dev_priv->info.gen == 7)
 			seq_printf(m, "GFX_MODE: 0x%08x\n", I915_READ(RING_MODE_GEN7(ring)));
 		seq_printf(m, "PP_DIR_BASE: 0x%08x\n", I915_READ(RING_PP_DIR_BASE(ring)));
 		seq_printf(m, "PP_DIR_BASE_READ: 0x%08x\n", I915_READ(RING_PP_DIR_BASE_READ(ring)));
@@ -1779,9 +1779,9 @@ static int i915_ppgtt_info(struct seq_file *m, void *data)
 		return ret;
 	intel_runtime_pm_get(dev_priv);
 
-	if (dev_priv->info->gen >= 8)
+	if (dev_priv->info.gen >= 8)
 		gen8_ppgtt_info(m, dev);
-	else if (dev_priv->info->gen >= 6)
+	else if (dev_priv->info.gen >= 6)
 		gen6_ppgtt_info(m, dev);
 
 	intel_runtime_pm_put(dev_priv);
@@ -1884,7 +1884,7 @@ static int i915_energy_uJ(struct seq_file *m, void *data)
 	u64 power;
 	u32 units;
 
-	if (dev_priv->info->gen < 6)
+	if (dev_priv->info.gen < 6)
 		return -ENODEV;
 
 	rdmsrl(MSR_RAPL_POWER_UNIT, power);
@@ -2004,7 +2004,7 @@ static int i915_pipe_crc_open(struct inode *inode, struct file *filep)
 	struct drm_i915_private *dev_priv = info->dev->dev_private;
 	struct intel_pipe_crc *pipe_crc = &dev_priv->pipe_crc[info->pipe];
 
-	if (info->pipe >= dev_priv->info->num_pipes)
+	if (info->pipe >= dev_priv->info.num_pipes)
 		return -ENODEV;
 
 	spin_lock_irq(&pipe_crc->lock);
@@ -2509,7 +2509,7 @@ static int pipe_crc_set_source(struct drm_device *dev, enum pipe pipe,
 
 	if (IS_GEN2(dev))
 		ret = i8xx_pipe_crc_ctl_reg(&source, &val);
-	else if (dev_priv->info->gen < 5)
+	else if (dev_priv->info.gen < 5)
 		ret = i9xx_pipe_crc_ctl_reg(dev, pipe, &source, &val);
 	else if (IS_VALLEYVIEW(dev))
 		ret = vlv_pipe_crc_ctl_reg(dev,pipe, &source, &val);
@@ -3133,7 +3133,7 @@ static int i915_forcewake_open(struct inode *inode, struct file *file)
 	struct drm_device *dev = inode->i_private;
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
-	if (dev_priv->info->gen < 6)
+	if (dev_priv->info.gen < 6)
 		return 0;
 
 	intel_runtime_pm_get(dev_priv);
@@ -3147,7 +3147,7 @@ static int i915_forcewake_release(struct inode *inode, struct file *file)
 	struct drm_device *dev = inode->i_private;
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
-	if (dev_priv->info->gen < 6)
+	if (dev_priv->info.gen < 6)
 		return 0;
 
 	gen6_gt_force_wake_put(dev_priv, FORCEWAKE_ALL);

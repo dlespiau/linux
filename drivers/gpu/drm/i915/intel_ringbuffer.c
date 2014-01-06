@@ -413,7 +413,7 @@ static void ring_write_tail(struct intel_ring_buffer *ring,
 u32 intel_ring_get_active_head(struct intel_ring_buffer *ring)
 {
 	drm_i915_private_t *dev_priv = ring->dev->dev_private;
-	u32 acthd_reg = dev_priv->info->gen >= 4 ?
+	u32 acthd_reg = dev_priv->info.gen >= 4 ?
 			RING_ACTHD(ring->mmio_base) : ACTHD;
 
 	return I915_READ(acthd_reg);
@@ -425,7 +425,7 @@ static void ring_setup_phys_status_page(struct intel_ring_buffer *ring)
 	u32 addr;
 
 	addr = dev_priv->status_page_dmah->busaddr;
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		addr |= (dev_priv->status_page_dmah->busaddr >> 28) & 0xf0;
 	I915_WRITE(HWS_PGA, addr);
 }
@@ -562,7 +562,7 @@ static int init_render_ring(struct intel_ring_buffer *ring)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	int ret = init_ring_common(ring);
 
-	if (dev_priv->info->gen > 3)
+	if (dev_priv->info.gen > 3)
 		I915_WRITE(MI_MODE, _MASKED_BIT_ENABLE(VS_TIMER_DISPATCH));
 
 	/* We need to disable the AsyncFlip performance optimisations in order
@@ -571,11 +571,11 @@ static int init_render_ring(struct intel_ring_buffer *ring)
 	 *
 	 * WaDisableAsyncFlipPerfMode:snb,ivb,hsw,vlv
 	 */
-	if (dev_priv->info->gen >= 6)
+	if (dev_priv->info.gen >= 6)
 		I915_WRITE(MI_MODE, _MASKED_BIT_ENABLE(ASYNC_FLIP_PERF_DISABLE));
 
 	/* Required for the hardware to program scanline values for waiting */
-	if (dev_priv->info->gen == 6)
+	if (dev_priv->info.gen == 6)
 		I915_WRITE(GFX_MODE,
 			   _MASKED_BIT_ENABLE(GFX_TLB_INVALIDATE_ALWAYS));
 
@@ -584,7 +584,7 @@ static int init_render_ring(struct intel_ring_buffer *ring)
 			   _MASKED_BIT_DISABLE(GFX_TLB_INVALIDATE_ALWAYS) |
 			   _MASKED_BIT_ENABLE(GFX_REPLAY_MODE));
 
-	if (dev_priv->info->gen >= 5) {
+	if (dev_priv->info.gen >= 5) {
 		ret = init_pipe_control(ring);
 		if (ret)
 			return ret;
@@ -607,7 +607,7 @@ static int init_render_ring(struct intel_ring_buffer *ring)
 			!!(I915_READ(GFX_MODE) & GFX_TLB_INVALIDATE_ALWAYS);
 	}
 
-	if (dev_priv->info->gen >= 6)
+	if (dev_priv->info.gen >= 6)
 		I915_WRITE(INSTPM, _MASKED_BIT_ENABLE(INSTPM_FORCE_ORDERING));
 
 	if (HAS_L3_DPF(dev))
@@ -623,7 +623,7 @@ static void render_ring_cleanup(struct intel_ring_buffer *ring)
 	if (ring->scratch.obj == NULL)
 		return;
 
-	if (dev_priv->info->gen >= 5) {
+	if (dev_priv->info.gen >= 5) {
 		kunmap(sg_page(ring->scratch.obj->pages->sgl));
 		i915_gem_object_ggtt_unpin(ring->scratch.obj);
 	}
@@ -976,7 +976,7 @@ void intel_ring_setup_status_page(struct intel_ring_buffer *ring)
 	POSTING_READ(mmio);
 
 	/* Flush the TLB for this page */
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		u32 reg = RING_INSTPM(ring->mmio_base);
 		I915_WRITE(reg,
 			   _MASKED_BIT_ENABLE(INSTPM_TLB_INVALIDATE |
@@ -1653,7 +1653,7 @@ void intel_ring_init_seqno(struct intel_ring_buffer *ring, u32 seqno)
 
 	BUG_ON(ring->outstanding_lazy_seqno);
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		I915_WRITE(RING_SYNC_0(ring->mmio_base), 0);
 		I915_WRITE(RING_SYNC_1(ring->mmio_base), 0);
 		if (HAS_VEBOX(ring->dev))
@@ -1709,7 +1709,7 @@ static int gen6_bsd_ring_flush(struct intel_ring_buffer *ring,
 		return ret;
 
 	cmd = MI_FLUSH_DW;
-	if (dev_priv->info->gen >= 8)
+	if (dev_priv->info.gen >= 8)
 		cmd += 1;
 	/*
 	 * Bspec vol 1c.5 - video engine command streamer:
@@ -1722,7 +1722,7 @@ static int gen6_bsd_ring_flush(struct intel_ring_buffer *ring,
 			MI_FLUSH_DW_STORE_INDEX | MI_FLUSH_DW_OP_STOREDW;
 	intel_ring_emit(ring, cmd);
 	intel_ring_emit(ring, I915_GEM_HWS_SCRATCH_ADDR | MI_FLUSH_DW_USE_GTT);
-	if (dev_priv->info->gen >= 8) {
+	if (dev_priv->info.gen >= 8) {
 		intel_ring_emit(ring, 0); /* upper addr */
 		intel_ring_emit(ring, 0); /* value */
 	} else  {
@@ -1814,7 +1814,7 @@ static int gen6_ring_flush(struct intel_ring_buffer *ring,
 		return ret;
 
 	cmd = MI_FLUSH_DW;
-	if (dev_priv->info->gen >= 8)
+	if (dev_priv->info.gen >= 8)
 		cmd += 1;
 	/*
 	 * Bspec vol 1c.3 - blitter engine command streamer:
@@ -1827,7 +1827,7 @@ static int gen6_ring_flush(struct intel_ring_buffer *ring,
 			MI_FLUSH_DW_OP_STOREDW;
 	intel_ring_emit(ring, cmd);
 	intel_ring_emit(ring, I915_GEM_HWS_SCRATCH_ADDR | MI_FLUSH_DW_USE_GTT);
-	if (dev_priv->info->gen >= 8) {
+	if (dev_priv->info.gen >= 8) {
 		intel_ring_emit(ring, 0); /* upper addr */
 		intel_ring_emit(ring, 0); /* value */
 	} else  {
@@ -1851,12 +1851,12 @@ int intel_init_render_ring_buffer(struct drm_device *dev)
 	ring->id = RCS;
 	ring->mmio_base = RENDER_RING_BASE;
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		ring->add_request = gen6_add_request;
 		ring->flush = gen7_render_ring_flush;
-		if (dev_priv->info->gen == 6)
+		if (dev_priv->info.gen == 6)
 			ring->flush = gen6_render_ring_flush;
-		if (dev_priv->info->gen >= 8) {
+		if (dev_priv->info.gen >= 8) {
 			ring->flush = gen8_render_ring_flush;
 			ring->irq_get = gen8_ring_get_irq;
 			ring->irq_put = gen8_ring_put_irq;
@@ -1887,7 +1887,7 @@ int intel_init_render_ring_buffer(struct drm_device *dev)
 					GT_RENDER_PIPECTL_NOTIFY_INTERRUPT;
 	} else {
 		ring->add_request = i9xx_add_request;
-		if (dev_priv->info->gen < 4)
+		if (dev_priv->info.gen < 4)
 			ring->flush = gen2_render_ring_flush;
 		else
 			ring->flush = gen4_render_ring_flush;
@@ -1907,9 +1907,9 @@ int intel_init_render_ring_buffer(struct drm_device *dev)
 		ring->dispatch_execbuffer = hsw_ring_dispatch_execbuffer;
 	else if (IS_GEN8(dev))
 		ring->dispatch_execbuffer = gen8_ring_dispatch_execbuffer;
-	else if (dev_priv->info->gen >= 6)
+	else if (dev_priv->info.gen >= 6)
 		ring->dispatch_execbuffer = gen6_ring_dispatch_execbuffer;
-	else if (dev_priv->info->gen >= 4)
+	else if (dev_priv->info.gen >= 4)
 		ring->dispatch_execbuffer = i965_dispatch_execbuffer;
 	else if (IS_I830(dev) || IS_845G(dev))
 		ring->dispatch_execbuffer = i830_dispatch_execbuffer;
@@ -1953,7 +1953,7 @@ int intel_render_ring_init_dri(struct drm_device *dev, u64 start, u32 size)
 	ring->id = RCS;
 	ring->mmio_base = RENDER_RING_BASE;
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		/* non-kms not supported on gen6+ */
 		return -ENODEV;
 	}
@@ -1962,7 +1962,7 @@ int intel_render_ring_init_dri(struct drm_device *dev, u64 start, u32 size)
 	 * gem_init ioctl returns with -ENODEV). Hence we do not need to set up
 	 * the special gen5 functions. */
 	ring->add_request = i9xx_add_request;
-	if (dev_priv->info->gen < 4)
+	if (dev_priv->info.gen < 4)
 		ring->flush = gen2_render_ring_flush;
 	else
 		ring->flush = gen4_render_ring_flush;
@@ -1977,7 +1977,7 @@ int intel_render_ring_init_dri(struct drm_device *dev, u64 start, u32 size)
 	}
 	ring->irq_enable_mask = I915_USER_INTERRUPT;
 	ring->write_tail = ring_write_tail;
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		ring->dispatch_execbuffer = i965_dispatch_execbuffer;
 	else if (IS_I830(dev) || IS_845G(dev))
 		ring->dispatch_execbuffer = i830_dispatch_execbuffer;
@@ -2020,7 +2020,7 @@ int intel_init_bsd_ring_buffer(struct drm_device *dev)
 	ring->id = VCS;
 
 	ring->write_tail = ring_write_tail;
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		ring->mmio_base = GEN6_BSD_RING_BASE;
 		/* gen6 bsd needs a special wa for tail updates */
 		if (IS_GEN6(dev))
@@ -2029,7 +2029,7 @@ int intel_init_bsd_ring_buffer(struct drm_device *dev)
 		ring->add_request = gen6_add_request;
 		ring->get_seqno = gen6_ring_get_seqno;
 		ring->set_seqno = ring_set_seqno;
-		if (dev_priv->info->gen >= 8) {
+		if (dev_priv->info.gen >= 8) {
 			ring->irq_enable_mask =
 				GT_RENDER_USER_INTERRUPT << GEN8_VCS1_IRQ_SHIFT;
 			ring->irq_get = gen8_ring_get_irq;
@@ -2088,7 +2088,7 @@ int intel_init_blt_ring_buffer(struct drm_device *dev)
 	ring->add_request = gen6_add_request;
 	ring->get_seqno = gen6_ring_get_seqno;
 	ring->set_seqno = ring_set_seqno;
-	if (dev_priv->info->gen >= 8) {
+	if (dev_priv->info.gen >= 8) {
 		ring->irq_enable_mask =
 			GT_RENDER_USER_INTERRUPT << GEN8_BCS_IRQ_SHIFT;
 		ring->irq_get = gen8_ring_get_irq;
@@ -2129,7 +2129,7 @@ int intel_init_vebox_ring_buffer(struct drm_device *dev)
 	ring->get_seqno = gen6_ring_get_seqno;
 	ring->set_seqno = ring_set_seqno;
 
-	if (dev_priv->info->gen >= 8) {
+	if (dev_priv->info.gen >= 8) {
 		ring->irq_enable_mask =
 			GT_RENDER_USER_INTERRUPT << GEN8_VECS_IRQ_SHIFT;
 		ring->irq_get = gen8_ring_get_irq;

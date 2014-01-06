@@ -964,7 +964,7 @@ int i915_gem_init_ppgtt(struct drm_device *dev, struct i915_hw_ppgtt *ppgtt)
 
 	ppgtt->base.dev = dev;
 
-	if (dev_priv->info->gen < 8)
+	if (dev_priv->info.gen < 8)
 		ret = gen6_ppgtt_init(ppgtt);
 	else if (IS_GEN8(dev))
 		ret = gen8_ppgtt_init(ppgtt, dev_priv->gtt.base.total);
@@ -977,7 +977,7 @@ int i915_gem_init_ppgtt(struct drm_device *dev, struct i915_hw_ppgtt *ppgtt)
 		drm_mm_init(&ppgtt->base.mm, ppgtt->base.start,
 			    ppgtt->base.total);
 		i915_init_vm(dev_priv, &ppgtt->base);
-		if (dev_priv->info->gen < 8) {
+		if (dev_priv->info.gen < 8) {
 			gen6_write_pdes(ppgtt);
 			DRM_DEBUG("Adding PPGTT at offset %x\n",
 				  ppgtt->pd_offset << 10);
@@ -1053,7 +1053,7 @@ void i915_check_and_clear_faults(struct drm_device *dev)
 	struct intel_ring_buffer *ring;
 	int i;
 
-	if (dev_priv->info->gen < 6)
+	if (dev_priv->info.gen < 6)
 		return;
 
 	for_each_ring(ring, dev_priv, i) {
@@ -1083,7 +1083,7 @@ void i915_gem_suspend_gtt_mappings(struct drm_device *dev)
 	/* Don't bother messing with faults pre GEN6 as we have little
 	 * documentation supporting that it's a good idea.
 	 */
-	if (dev_priv->info->gen < 6)
+	if (dev_priv->info.gen < 6)
 		return;
 
 	i915_check_and_clear_faults(dev);
@@ -1124,7 +1124,7 @@ void i915_gem_restore_gtt_mappings(struct drm_device *dev)
 	}
 
 
-	if (dev_priv->info->gen >= 8)
+	if (dev_priv->info.gen >= 8)
 		return;
 
 	list_for_each_entry(vm, &dev_priv->vm_list, global_link) {
@@ -1741,10 +1741,10 @@ int i915_gem_gtt_init(struct drm_device *dev)
 	struct i915_gtt *gtt = &dev_priv->gtt;
 	int ret;
 
-	if (dev_priv->info->gen <= 5) {
+	if (dev_priv->info.gen <= 5) {
 		gtt->gtt_probe = i915_gmch_probe;
 		gtt->base.cleanup = i915_gmch_remove;
-	} else if (dev_priv->info->gen < 8) {
+	} else if (dev_priv->info.gen < 8) {
 		gtt->gtt_probe = gen6_gmch_probe;
 		gtt->base.cleanup = gen6_gmch_remove;
 		if (IS_HASWELL(dev) && dev_priv->ellc_size)
@@ -1753,7 +1753,7 @@ int i915_gem_gtt_init(struct drm_device *dev)
 			gtt->base.pte_encode = hsw_pte_encode;
 		else if (IS_VALLEYVIEW(dev))
 			gtt->base.pte_encode = byt_pte_encode;
-		else if (dev_priv->info->gen >= 7)
+		else if (dev_priv->info.gen >= 7)
 			gtt->base.pte_encode = ivb_pte_encode;
 		else
 			gtt->base.pte_encode = snb_pte_encode;
@@ -1791,7 +1791,7 @@ static struct i915_vma *__i915_gem_vma_create(struct drm_i915_gem_object *obj,
 	vma->vm = vm;
 	vma->obj = obj;
 
-	switch (to_i915(vm->dev)->info->gen) {
+	switch (to_i915(vm->dev)->info.gen) {
 	case 8:
 	case 7:
 	case 6:

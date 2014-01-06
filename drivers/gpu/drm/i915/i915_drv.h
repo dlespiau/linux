@@ -157,7 +157,7 @@ enum hpd_pin {
 	 I915_GEM_DOMAIN_VERTEX)
 
 #define for_each_pipe(p) \
-	for ((p) = 0; (p) < to_i915(dev)->info->num_pipes; (p)++)
+	for ((p) = 0; (p) < to_i915(dev)->info.num_pipes; (p)++)
 
 #define for_each_encoder_on_crtc(dev, __crtc, intel_encoder) \
 	list_for_each_entry((intel_encoder), &(dev)->mode_config.encoder_list, base.head) \
@@ -1361,7 +1361,7 @@ typedef struct drm_i915_private {
 	struct drm_device *dev;
 	struct kmem_cache *slab;
 
-	const struct intel_device_info *info;
+	const struct intel_device_info info;
 
 	int relative_constants_mode;
 
@@ -1774,32 +1774,32 @@ struct drm_i915_file_private {
 
 #define IS_I830(dev)		((dev)->pdev->device == 0x3577)
 #define IS_845G(dev)		((dev)->pdev->device == 0x2562)
-#define IS_I85X(dev)		(to_i915(dev)->info->is_i85x)
+#define IS_I85X(dev)		(to_i915(dev)->info.is_i85x)
 #define IS_I865G(dev)		((dev)->pdev->device == 0x2572)
-#define IS_I915G(dev)		(to_i915(dev)->info->is_i915g)
+#define IS_I915G(dev)		(to_i915(dev)->info.is_i915g)
 #define IS_I915GM(dev)		((dev)->pdev->device == 0x2592)
 #define IS_I945G(dev)		((dev)->pdev->device == 0x2772)
-#define IS_I945GM(dev)		(to_i915(dev)->info->is_i945gm)
-#define IS_BROADWATER(dev)	(to_i915(dev)->info->is_broadwater)
-#define IS_CRESTLINE(dev)	(to_i915(dev)->info->is_crestline)
+#define IS_I945GM(dev)		(to_i915(dev)->info.is_i945gm)
+#define IS_BROADWATER(dev)	(to_i915(dev)->info.is_broadwater)
+#define IS_CRESTLINE(dev)	(to_i915(dev)->info.is_crestline)
 #define IS_GM45(dev)		((dev)->pdev->device == 0x2A42)
-#define IS_G4X(dev)		(to_i915(dev)->info->is_g4x)
+#define IS_G4X(dev)		(to_i915(dev)->info.is_g4x)
 #define IS_PINEVIEW_G(dev)	((dev)->pdev->device == 0xa001)
 #define IS_PINEVIEW_M(dev)	((dev)->pdev->device == 0xa011)
-#define IS_PINEVIEW(dev)	(to_i915(dev)->info->is_pineview)
-#define IS_G33(dev)		(to_i915(dev)->info->is_g33)
+#define IS_PINEVIEW(dev)	(to_i915(dev)->info.is_pineview)
+#define IS_G33(dev)		(to_i915(dev)->info.is_g33)
 #define IS_IRONLAKE_M(dev)	((dev)->pdev->device == 0x0046)
-#define IS_IVYBRIDGE(dev)	(to_i915(dev)->info->is_ivybridge)
+#define IS_IVYBRIDGE(dev)	(to_i915(dev)->info.is_ivybridge)
 #define IS_IVB_GT1(dev)		((dev)->pdev->device == 0x0156 || \
 				 (dev)->pdev->device == 0x0152 || \
 				 (dev)->pdev->device == 0x015a)
 #define IS_SNB_GT1(dev)		((dev)->pdev->device == 0x0102 || \
 				 (dev)->pdev->device == 0x0106 || \
 				 (dev)->pdev->device == 0x010A)
-#define IS_VALLEYVIEW(dev)	(to_i915(dev)->info->is_valleyview)
-#define IS_HASWELL(dev)		(to_i915(dev)->info->is_haswell)
-#define IS_BROADWELL(dev)	(to_i915(dev)->info->gen == 8)
-#define IS_MOBILE(dev)		(to_i915(dev)->info->is_mobile)
+#define IS_VALLEYVIEW(dev)	(to_i915(dev)->info.is_valleyview)
+#define IS_HASWELL(dev)		(to_i915(dev)->info.is_haswell)
+#define IS_BROADWELL(dev)	(to_i915(dev)->info.gen == 8)
+#define IS_MOBILE(dev)		(to_i915(dev)->info.is_mobile)
 #define IS_HSW_EARLY_SDV(dev)	(IS_HASWELL(dev) && \
 				 ((dev)->pdev->device & 0xFF00) == 0x0C00)
 #define IS_BDW_ULT(dev)		(IS_BROADWELL(dev) && \
@@ -1819,33 +1819,33 @@ struct drm_i915_file_private {
  * have their own (e.g. HAS_PCH_SPLIT for ILK+ display, IS_foo for particular
  * chips, etc.).
  */
-#define IS_GEN2(dev)	(to_i915(dev)->info->gen == 2)
-#define IS_GEN3(dev)	(to_i915(dev)->info->gen == 3)
-#define IS_GEN4(dev)	(to_i915(dev)->info->gen == 4)
-#define IS_GEN5(dev)	(to_i915(dev)->info->gen == 5)
-#define IS_GEN6(dev)	(to_i915(dev)->info->gen == 6)
-#define IS_GEN7(dev)	(to_i915(dev)->info->gen == 7)
-#define IS_GEN8(dev)	(to_i915(dev)->info->gen == 8)
+#define IS_GEN2(dev)	(to_i915(dev)->info.gen == 2)
+#define IS_GEN3(dev)	(to_i915(dev)->info.gen == 3)
+#define IS_GEN4(dev)	(to_i915(dev)->info.gen == 4)
+#define IS_GEN5(dev)	(to_i915(dev)->info.gen == 5)
+#define IS_GEN6(dev)	(to_i915(dev)->info.gen == 6)
+#define IS_GEN7(dev)	(to_i915(dev)->info.gen == 7)
+#define IS_GEN8(dev)	(to_i915(dev)->info.gen == 8)
 
 #define RENDER_RING		(1<<RCS)
 #define BSD_RING		(1<<VCS)
 #define BLT_RING		(1<<BCS)
 #define VEBOX_RING		(1<<VECS)
-#define HAS_BSD(dev)            (to_i915(dev)->info->ring_mask & BSD_RING)
-#define HAS_BLT(dev)            (to_i915(dev)->info->ring_mask & BLT_RING)
-#define HAS_VEBOX(dev)            (to_i915(dev)->info->ring_mask & VEBOX_RING)
-#define HAS_LLC(dev)            (to_i915(dev)->info->has_llc)
+#define HAS_BSD(dev)            (to_i915(dev)->info.ring_mask & BSD_RING)
+#define HAS_BLT(dev)            (to_i915(dev)->info.ring_mask & BLT_RING)
+#define HAS_VEBOX(dev)            (to_i915(dev)->info.ring_mask & VEBOX_RING)
+#define HAS_LLC(dev)            (to_i915(dev)->info.has_llc)
 #define HAS_WT(dev)            (IS_HASWELL(dev) && to_i915(dev)->ellc_size)
-#define I915_NEED_GFX_HWS(dev)	(to_i915(dev)->info->need_gfx_hws)
+#define I915_NEED_GFX_HWS(dev)	(to_i915(dev)->info.need_gfx_hws)
 
-#define HAS_HW_CONTEXTS(dev)	(to_i915(dev)->info->gen >= 6)
-#define HAS_ALIASING_PPGTT(dev)	(to_i915(dev)->info->gen >= 6 && !IS_VALLEYVIEW(dev))
-#define HAS_PPGTT(dev)		(to_i915(dev)->info->gen >= 7 && !IS_VALLEYVIEW(dev) && !IS_BROADWELL(dev))
+#define HAS_HW_CONTEXTS(dev)	(to_i915(dev)->info.gen >= 6)
+#define HAS_ALIASING_PPGTT(dev)	(to_i915(dev)->info.gen >= 6 && !IS_VALLEYVIEW(dev))
+#define HAS_PPGTT(dev)		(to_i915(dev)->info.gen >= 7 && !IS_VALLEYVIEW(dev) && !IS_BROADWELL(dev))
 #define USES_ALIASING_PPGTT(dev) intel_enable_ppgtt(dev, false)
 #define USES_FULL_PPGTT(dev)	intel_enable_ppgtt(dev, true)
 
-#define HAS_OVERLAY(dev)		(to_i915(dev)->info->has_overlay)
-#define OVERLAY_NEEDS_PHYSICAL(dev)	(to_i915(dev)->info->overlay_needs_physical)
+#define HAS_OVERLAY(dev)		(to_i915(dev)->info.has_overlay)
+#define OVERLAY_NEEDS_PHYSICAL(dev)	(to_i915(dev)->info.overlay_needs_physical)
 
 /* Early gen2 have a totally busted CS tlb and require pinned batches. */
 #define HAS_BROKEN_CS_TLB(dev)		(IS_I830(dev) || IS_845G(dev))
@@ -1858,17 +1858,17 @@ struct drm_i915_file_private {
 #define SUPPORTS_DIGITAL_OUTPUTS(dev)	(!IS_GEN2(dev) && !IS_PINEVIEW(dev))
 #define SUPPORTS_INTEGRATED_HDMI(dev)	(IS_G4X(dev) || IS_GEN5(dev))
 #define SUPPORTS_INTEGRATED_DP(dev)	(IS_G4X(dev) || IS_GEN5(dev))
-#define SUPPORTS_TV(dev)		(to_i915(dev)->info->supports_tv)
-#define I915_HAS_HOTPLUG(dev)		 (to_i915(dev)->info->has_hotplug)
+#define SUPPORTS_TV(dev)		(to_i915(dev)->info.supports_tv)
+#define I915_HAS_HOTPLUG(dev)		 (to_i915(dev)->info.has_hotplug)
 
-#define HAS_FW_BLC(dev) (to_i915(dev)->info->gen > 2)
-#define HAS_PIPE_CXSR(dev) (to_i915(dev)->info->has_pipe_cxsr)
-#define I915_HAS_FBC(dev) (to_i915(dev)->info->has_fbc)
+#define HAS_FW_BLC(dev) (to_i915(dev)->info.gen > 2)
+#define HAS_PIPE_CXSR(dev) (to_i915(dev)->info.has_pipe_cxsr)
+#define I915_HAS_FBC(dev) (to_i915(dev)->info.has_fbc)
 
 #define HAS_IPS(dev)		(IS_ULT(dev) || IS_BROADWELL(dev))
 
-#define HAS_DDI(dev)		(to_i915(dev)->info->has_ddi)
-#define HAS_FPGA_DBG_UNCLAIMED(dev)	(to_i915(dev)->info->has_fpga_dbg)
+#define HAS_DDI(dev)		(to_i915(dev)->info.has_ddi)
+#define HAS_FPGA_DBG_UNCLAIMED(dev)	(to_i915(dev)->info.has_fpga_dbg)
 #define HAS_PSR(dev)		(IS_HASWELL(dev) || IS_BROADWELL(dev))
 #define HAS_PC8(dev)		(IS_HASWELL(dev)) /* XXX HSW:ULX */
 #define HAS_RUNTIME_PM(dev)	(IS_HASWELL(dev))
@@ -2296,7 +2296,7 @@ void i915_gem_setup_global_gtt(struct drm_device *dev, unsigned long start,
 int i915_gem_gtt_init(struct drm_device *dev);
 static inline void i915_gem_chipset_flush(struct drm_device *dev)
 {
-	if (to_i915(dev)->info->gen < 6)
+	if (to_i915(dev)->info.gen < 6)
 		intel_gtt_chipset_flush();
 }
 int i915_gem_init_ppgtt(struct drm_device *dev, struct i915_hw_ppgtt *ppgtt);
@@ -2310,7 +2310,7 @@ static inline bool intel_enable_ppgtt(struct drm_device *dev, bool full)
 
 #ifdef CONFIG_INTEL_IOMMU
 	/* Disable ppgtt on SNB if VT-d is on. */
-	if (to_i915(dev)->info->gen == 6 && intel_iommu_gfx_mapped) {
+	if (to_i915(dev)->info.gen == 6 && intel_iommu_gfx_mapped) {
 		DRM_INFO("Disabling PPGTT because VT-d is on\n");
 		return false;
 	}

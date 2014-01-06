@@ -505,7 +505,7 @@ static void i915_enable_asle_pipestat(struct drm_device *dev)
 	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
 
 	i915_enable_pipestat(dev_priv, PIPE_B, PIPE_LEGACY_BLC_EVENT_ENABLE);
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		i915_enable_pipestat(dev_priv, PIPE_A,
 				     PIPE_LEGACY_BLC_EVENT_ENABLE);
 
@@ -639,13 +639,13 @@ static bool intel_pipe_in_vblank_locked(struct drm_device *dev, enum pipe pipe)
 			I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT;
 
 		reg = ISR;
-	} else if (dev_priv->info->gen < 5) {
+	} else if (dev_priv->info.gen < 5) {
 		status = pipe == PIPE_A ?
 			I915_DISPLAY_PIPE_A_VBLANK_INTERRUPT :
 			I915_DISPLAY_PIPE_B_VBLANK_INTERRUPT;
 
 		reg = ISR;
-	} else if (dev_priv->info->gen < 7) {
+	} else if (dev_priv->info.gen < 7) {
 		status = pipe == PIPE_A ?
 			DE_PIPEA_VBLANK :
 			DE_PIPEB_VBLANK;
@@ -713,7 +713,7 @@ static int i915_get_crtc_scanoutpos(struct drm_device *dev, int pipe,
 	if (stime)
 		*stime = ktime_get();
 
-	if (IS_GEN2(dev) || IS_G4X(dev) || dev_priv->info->gen >= 5) {
+	if (IS_GEN2(dev) || IS_G4X(dev) || dev_priv->info.gen >= 5) {
 		/* No obvious pixelcount register. Only query vertical
 		 * scanout position from Display scan line register.
 		 */
@@ -767,7 +767,7 @@ static int i915_get_crtc_scanoutpos(struct drm_device *dev, int pipe,
 	else
 		position += vtotal - vbl_end;
 
-	if (IS_GEN2(dev) || IS_G4X(dev) || dev_priv->info->gen >= 5) {
+	if (IS_GEN2(dev) || IS_G4X(dev) || dev_priv->info.gen >= 5) {
 		*vpos = position;
 		*hpos = 0;
 	} else {
@@ -790,7 +790,7 @@ static int i915_get_vblank_timestamp(struct drm_device *dev, int pipe,
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct drm_crtc *crtc;
 
-	if (pipe < 0 || pipe >= dev_priv->info->num_pipes) {
+	if (pipe < 0 || pipe >= dev_priv->info.num_pipes) {
 		DRM_ERROR("Invalid crtc %d\n", pipe);
 		return -EINVAL;
 	}
@@ -1367,12 +1367,12 @@ static void i9xx_pipe_crc_irq_handler(struct drm_device *dev, enum pipe pipe)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	uint32_t res1, res2;
 
-	if (dev_priv->info->gen >= 3)
+	if (dev_priv->info.gen >= 3)
 		res1 = I915_READ(PIPE_CRC_RES_RES1_I915(pipe));
 	else
 		res1 = 0;
 
-	if (dev_priv->info->gen >= 5 || IS_G4X(dev))
+	if (dev_priv->info.gen >= 5 || IS_G4X(dev))
 		res2 = I915_READ(PIPE_CRC_RES_RES2_G4X(pipe));
 	else
 		res2 = 0;
@@ -1756,7 +1756,7 @@ static irqreturn_t ironlake_irq_handler(int irq, void *arg)
 
 	gt_iir = I915_READ(GTIIR);
 	if (gt_iir) {
-		if (dev_priv->info->gen >= 6)
+		if (dev_priv->info.gen >= 6)
 			snb_gt_irq_handler(dev, dev_priv, gt_iir);
 		else
 			ilk_gt_irq_handler(dev, dev_priv, gt_iir);
@@ -1766,7 +1766,7 @@ static irqreturn_t ironlake_irq_handler(int irq, void *arg)
 
 	de_iir = I915_READ(DEIIR);
 	if (de_iir) {
-		if (dev_priv->info->gen >= 7)
+		if (dev_priv->info.gen >= 7)
 			ivb_display_irq_handler(dev, de_iir);
 		else
 			ilk_display_irq_handler(dev, de_iir);
@@ -1774,7 +1774,7 @@ static irqreturn_t ironlake_irq_handler(int irq, void *arg)
 		ret = IRQ_HANDLED;
 	}
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		u32 pm_iir = I915_READ(GEN6_PMIIR);
 		if (pm_iir) {
 			gen6_rps_irq_handler(dev_priv, pm_iir);
@@ -2064,7 +2064,7 @@ static void i915_report_and_clear_eir(struct drm_device *dev)
 		pr_err("  INSTPM: 0x%08x\n", I915_READ(INSTPM));
 		for (i = 0; i < ARRAY_SIZE(instdone); i++)
 			pr_err("  INSTDONE_%d: 0x%08x\n", i, instdone[i]);
-		if (dev_priv->info->gen < 4) {
+		if (dev_priv->info.gen < 4) {
 			u32 ipeir = I915_READ(IPEIR);
 
 			pr_err("  IPEIR: 0x%08x\n", I915_READ(IPEIR));
@@ -2171,7 +2171,7 @@ static void __always_unused i915_pageflip_stall_check(struct drm_device *dev, in
 
 	/* Potential stall - if we see that the flip has happened, assume a missed interrupt */
 	obj = work->pending_flip_obj;
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		int dspsurf = DSPSURF(intel_crtc->plane);
 		stall_detected = I915_HI_DISPBASE(I915_READ(dspsurf)) ==
 					i915_gem_obj_ggtt_offset(obj);
@@ -2202,7 +2202,7 @@ static int i915_enable_vblank(struct drm_device *dev, int pipe)
 		return -EINVAL;
 
 	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		i915_enable_pipestat(dev_priv, pipe,
 				     PIPE_START_VBLANK_INTERRUPT_ENABLE);
 	else
@@ -2210,7 +2210,7 @@ static int i915_enable_vblank(struct drm_device *dev, int pipe)
 				     PIPE_VBLANK_INTERRUPT_ENABLE);
 
 	/* maintain vblank delivery even in deep C-states */
-	if (dev_priv->info->gen == 3)
+	if (dev_priv->info.gen == 3)
 		I915_WRITE(INSTPM, _MASKED_BIT_DISABLE(INSTPM_AGPBUSY_DIS));
 	spin_unlock_irqrestore(&dev_priv->irq_lock, irqflags);
 
@@ -2221,7 +2221,7 @@ static int ironlake_enable_vblank(struct drm_device *dev, int pipe)
 {
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	unsigned long irqflags;
-	uint32_t bit = (dev_priv->info->gen >= 7) ? DE_PIPE_VBLANK_IVB(pipe) :
+	uint32_t bit = (dev_priv->info.gen >= 7) ? DE_PIPE_VBLANK_IVB(pipe) :
 						     DE_PIPE_VBLANK(pipe);
 
 	if (!i915_pipe_enabled(dev, pipe))
@@ -2282,7 +2282,7 @@ static void i915_disable_vblank(struct drm_device *dev, int pipe)
 	unsigned long irqflags;
 
 	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
-	if (dev_priv->info->gen == 3)
+	if (dev_priv->info.gen == 3)
 		I915_WRITE(INSTPM, _MASKED_BIT_ENABLE(INSTPM_AGPBUSY_DIS));
 
 	i915_disable_pipestat(dev_priv, pipe,
@@ -2295,7 +2295,7 @@ static void ironlake_disable_vblank(struct drm_device *dev, int pipe)
 {
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	unsigned long irqflags;
-	uint32_t bit = (dev_priv->info->gen >= 7) ? DE_PIPE_VBLANK_IVB(pipe) :
+	uint32_t bit = (dev_priv->info.gen >= 7) ? DE_PIPE_VBLANK_IVB(pipe) :
 						     DE_PIPE_VBLANK(pipe);
 
 	spin_lock_irqsave(&dev_priv->irq_lock, irqflags);
@@ -2436,7 +2436,7 @@ ring_stuck(struct intel_ring_buffer *ring, u32 acthd)
 		return HANGCHECK_KICK;
 	}
 
-	if (dev_priv->info->gen >= 6 && tmp & RING_WAIT_SEMAPHORE) {
+	if (dev_priv->info.gen >= 6 && tmp & RING_WAIT_SEMAPHORE) {
 		switch (semaphore_passed(ring)) {
 		default:
 			return HANGCHECK_HUNG;
@@ -2612,7 +2612,7 @@ static void gen5_gt_irq_preinstall(struct drm_device *dev)
 	I915_WRITE(GTIER, 0x0);
 	POSTING_READ(GTIER);
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		/* and PM */
 		I915_WRITE(GEN6_PMIMR, 0xffffffff);
 		I915_WRITE(GEN6_PMIER, 0x0);
@@ -2800,7 +2800,7 @@ static void gen5_gt_irq_postinstall(struct drm_device *dev)
 	I915_WRITE(GTIER, gt_irqs);
 	POSTING_READ(GTIER);
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		pm_irqs |= GEN6_PM_RPS_EVENTS;
 
 		if (HAS_VEBOX(dev))
@@ -2820,7 +2820,7 @@ static int ironlake_irq_postinstall(struct drm_device *dev)
 	drm_i915_private_t *dev_priv = (drm_i915_private_t *) dev->dev_private;
 	u32 display_mask, extra_mask;
 
-	if (dev_priv->info->gen >= 7) {
+	if (dev_priv->info.gen >= 7) {
 		display_mask = (DE_MASTER_IRQ_CONTROL | DE_GSE_IVB |
 				DE_PCH_EVENT_IVB | DE_PLANEC_FLIP_DONE_IVB |
 				DE_PLANEB_FLIP_DONE_IVB |
@@ -3799,7 +3799,7 @@ void intel_irq_init(struct drm_device *dev)
 	if (IS_GEN2(dev)) {
 		dev->max_vblank_count = 0;
 		dev->driver->get_vblank_counter = i8xx_get_vblank_counter;
-	} else if (IS_G4X(dev) || dev_priv->info->gen >= 5) {
+	} else if (IS_G4X(dev) || dev_priv->info.gen >= 5) {
 		dev->max_vblank_count = 0xffffffff; /* full 32 bit counter */
 		dev->driver->get_vblank_counter = gm45_get_vblank_counter;
 	} else {
@@ -3837,12 +3837,12 @@ void intel_irq_init(struct drm_device *dev)
 		dev->driver->disable_vblank = ironlake_disable_vblank;
 		dev_priv->display.hpd_irq_setup = ibx_hpd_irq_setup;
 	} else {
-		if (dev_priv->info->gen == 2) {
+		if (dev_priv->info.gen == 2) {
 			dev->driver->irq_preinstall = i8xx_irq_preinstall;
 			dev->driver->irq_postinstall = i8xx_irq_postinstall;
 			dev->driver->irq_handler = i8xx_irq_handler;
 			dev->driver->irq_uninstall = i8xx_irq_uninstall;
-		} else if (dev_priv->info->gen == 3) {
+		} else if (dev_priv->info.gen == 3) {
 			dev->driver->irq_preinstall = i915_irq_preinstall;
 			dev->driver->irq_postinstall = i915_irq_postinstall;
 			dev->driver->irq_uninstall = i915_irq_uninstall;

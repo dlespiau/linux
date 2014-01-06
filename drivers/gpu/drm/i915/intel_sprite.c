@@ -1080,14 +1080,14 @@ intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 	int num_plane_formats;
 	int ret;
 
-	if (dev_priv->info->gen < 5)
+	if (dev_priv->info.gen < 5)
 		return -ENODEV;
 
 	intel_plane = kzalloc(sizeof(*intel_plane), GFP_KERNEL);
 	if (!intel_plane)
 		return -ENOMEM;
 
-	switch (dev_priv->info->gen) {
+	switch (dev_priv->info.gen) {
 	case 5:
 	case 6:
 		intel_plane->can_scale = true;

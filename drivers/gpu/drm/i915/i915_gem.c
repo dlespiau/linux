@@ -180,7 +180,7 @@ i915_gem_init_ioctl(struct drm_device *dev, void *data,
 		return -EINVAL;
 
 	/* GEM with user mode setting was never supported on ilk and later. */
-	if (dev_priv->info->gen >= 5)
+	if (dev_priv->info.gen >= 5)
 		return -ENODEV;
 
 	mutex_lock(&dev->struct_mutex);
@@ -1029,7 +1029,7 @@ static int __wait_seqno(struct intel_ring_buffer *ring, u32 seqno,
 
 	timeout_expire = timeout ? jiffies + timespec_to_jiffies_timeout(timeout) : 0;
 
-	if (dev_priv->info->gen >= 6 && can_wait_boost(file_priv)) {
+	if (dev_priv->info.gen >= 6 && can_wait_boost(file_priv)) {
 		gen6_rps_boost(dev_priv);
 		if (file_priv)
 			mod_delayed_work(dev_priv->wq,
@@ -1511,12 +1511,12 @@ i915_gem_get_gtt_size(struct drm_device *dev, uint32_t size, int tiling_mode)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	uint32_t gtt_size;
 
-	if (dev_priv->info->gen >= 4 ||
+	if (dev_priv->info.gen >= 4 ||
 	    tiling_mode == I915_TILING_NONE)
 		return size;
 
 	/* Previous chips need a power-of-two fence region when tiling */
-	if (dev_priv->info->gen == 3)
+	if (dev_priv->info.gen == 3)
 		gtt_size = 1024*1024;
 	else
 		gtt_size = 512*1024;
@@ -1544,7 +1544,7 @@ i915_gem_get_gtt_alignment(struct drm_device *dev, uint32_t size,
 	 * Minimum alignment is 4k (GTT page size), but might be greater
 	 * if a fence register is needed for the object.
 	 */
-	if (dev_priv->info->gen >= 4 || (!fenced && IS_G33(dev)) ||
+	if (dev_priv->info.gen >= 4 || (!fenced && IS_G33(dev)) ||
 	    tiling_mode == I915_TILING_NONE)
 		return 4096;
 
@@ -2869,7 +2869,7 @@ static void i965_write_fence_reg(struct drm_device *dev, int reg,
 	int fence_reg;
 	int fence_pitch_shift;
 
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		fence_reg = FENCE_REG_SANDYBRIDGE_0;
 		fence_pitch_shift = SANDYBRIDGE_FENCE_PITCH_SHIFT;
 	} else {
@@ -3010,7 +3010,7 @@ static void i915_gem_write_fence(struct drm_device *dev, int reg,
 	     "bogus fence setup with stride: 0x%x, tiling mode: %i\n",
 	     obj->stride, obj->tiling_mode);
 
-	switch (dev_priv->info->gen) {
+	switch (dev_priv->info.gen) {
 	case 8:
 	case 7:
 	case 6:
@@ -3556,7 +3556,7 @@ int i915_gem_object_set_cache_level(struct drm_i915_gem_object *obj,
 		 * registers with snooped memory, so relinquish any fences
 		 * currently pointing to our region in the aperture.
 		 */
-		if (dev_priv->info->gen < 6) {
+		if (dev_priv->info.gen < 6) {
 			ret = i915_gem_object_put_fence(obj);
 			if (ret)
 				return ret;
@@ -3960,7 +3960,7 @@ i915_gem_pin_ioctl(struct drm_device *dev, void *data,
 	struct drm_i915_gem_object *obj;
 	int ret;
 
-	if (dev_priv->info->gen >= 6)
+	if (dev_priv->info.gen >= 6)
 		return -ENODEV;
 
 	ret = i915_mutex_lock_interruptible(dev);
@@ -4369,7 +4369,7 @@ void i915_gem_init_swizzling(struct drm_device *dev)
 {
 	drm_i915_private_t *dev_priv = dev->dev_private;
 
-	if (dev_priv->info->gen < 5 ||
+	if (dev_priv->info.gen < 5 ||
 	    dev_priv->mm.bit_6_swizzle_x == I915_BIT_6_SWIZZLE_NONE)
 		return;
 
@@ -4458,7 +4458,7 @@ i915_gem_init_hw(struct drm_device *dev)
 	drm_i915_private_t *dev_priv = dev->dev_private;
 	int ret, i;
 
-	if (dev_priv->info->gen < 6 && !intel_enable_gtt())
+	if (dev_priv->info.gen < 6 && !intel_enable_gtt())
 		return -EIO;
 
 	if (dev_priv->ellc_size)
@@ -4676,9 +4676,9 @@ i915_gem_load(struct drm_device *dev)
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		dev_priv->fence_reg_start = 3;
 
-	if (dev_priv->info->gen >= 7 && !IS_VALLEYVIEW(dev))
+	if (dev_priv->info.gen >= 7 && !IS_VALLEYVIEW(dev))
 		dev_priv->num_fence_regs = 32;
-	else if (dev_priv->info->gen >= 4 || IS_I945G(dev) || IS_I945GM(dev) || IS_G33(dev))
+	else if (dev_priv->info.gen >= 4 || IS_I945G(dev) || IS_I945GM(dev) || IS_G33(dev))
 		dev_priv->num_fence_regs = 16;
 	else
 		dev_priv->num_fence_regs = 8;

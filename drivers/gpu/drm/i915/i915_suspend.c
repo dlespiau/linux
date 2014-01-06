@@ -194,7 +194,7 @@ static void i915_save_display(struct drm_device *dev)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
 	/* Display arbitration control */
-	if (dev_priv->info->gen <= 4)
+	if (dev_priv->info.gen <= 4)
 		dev_priv->regfile.saveDSPARB = I915_READ(DSPARB);
 
 	/* This is only meaningful in non-KMS mode */
@@ -260,7 +260,7 @@ static void i915_restore_display(struct drm_device *dev)
 	u32 mask = 0xffffffff;
 
 	/* Display arbitration */
-	if (dev_priv->info->gen <= 4)
+	if (dev_priv->info.gen <= 4)
 		I915_WRITE(DSPARB, dev_priv->regfile.saveDSPARB);
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
@@ -271,7 +271,7 @@ static void i915_restore_display(struct drm_device *dev)
 
 	if (HAS_PCH_IBX(dev) || HAS_PCH_CPT(dev))
 		I915_WRITE(PCH_LVDS, dev_priv->regfile.saveLVDS & mask);
-	else if (dev_priv->info->gen <= 4 && IS_MOBILE(dev) && !IS_I830(dev))
+	else if (dev_priv->info.gen <= 4 && IS_MOBILE(dev) && !IS_I830(dev))
 		I915_WRITE(LVDS, dev_priv->regfile.saveLVDS & mask);
 
 	if (!IS_I830(dev) && !IS_845G(dev) && !HAS_PCH_SPLIT(dev))
@@ -324,7 +324,7 @@ int i915_save_state(struct drm_device *dev)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	int i;
 
-	if (dev_priv->info->gen <= 4)
+	if (dev_priv->info.gen <= 4)
 		pci_read_config_byte(dev->pdev, LBB,
 				     &dev_priv->regfile.saveLBB);
 
@@ -353,7 +353,7 @@ int i915_save_state(struct drm_device *dev)
 	intel_disable_gt_powersave(dev);
 
 	/* Cache mode state */
-	if (dev_priv->info->gen < 7)
+	if (dev_priv->info.gen < 7)
 		dev_priv->regfile.saveCACHE_MODE_0 = I915_READ(CACHE_MODE_0);
 
 	/* Memory Arbitration state */
@@ -377,7 +377,7 @@ int i915_restore_state(struct drm_device *dev)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	int i;
 
-	if (dev_priv->info->gen <= 4)
+	if (dev_priv->info.gen <= 4)
 		pci_write_config_byte(dev->pdev, LBB,
 				      dev_priv->regfile.saveLBB);
 
@@ -403,7 +403,7 @@ int i915_restore_state(struct drm_device *dev)
 	}
 
 	/* Cache mode state */
-	if (dev_priv->info->gen < 7)
+	if (dev_priv->info.gen < 7)
 		I915_WRITE(CACHE_MODE_0, dev_priv->regfile.saveCACHE_MODE_0 |
 			   0xffff0000);
 

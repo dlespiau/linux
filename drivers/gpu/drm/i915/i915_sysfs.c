@@ -562,7 +562,7 @@ void i915_setup_sysfs(struct drm_device *dev)
 	int ret;
 
 #ifdef CONFIG_PM
-	if (dev_priv->info->gen >= 6) {
+	if (dev_priv->info.gen >= 6) {
 		ret = sysfs_merge_group(&dev->primary->kdev->kobj,
 					&rc6_attr_group);
 		if (ret)
@@ -585,7 +585,7 @@ void i915_setup_sysfs(struct drm_device *dev)
 	ret = 0;
 	if (IS_VALLEYVIEW(dev))
 		ret = sysfs_create_files(&dev->primary->kdev->kobj, vlv_attrs);
-	else if (dev_priv->info->gen >= 6)
+	else if (dev_priv->info.gen >= 6)
 		ret = sysfs_create_files(&dev->primary->kdev->kobj, gen6_attrs);
 	if (ret)
 		DRM_ERROR("RPS sysfs setup failed\n");

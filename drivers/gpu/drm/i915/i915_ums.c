@@ -124,7 +124,7 @@ void i915_save_display_reg(struct drm_device *dev)
 		dev_priv->regfile.saveFPA1 = I915_READ(_FPA1);
 		dev_priv->regfile.saveDPLL_A = I915_READ(_DPLL_A);
 	}
-	if (dev_priv->info->gen >= 4 && !HAS_PCH_SPLIT(dev))
+	if (dev_priv->info.gen >= 4 && !HAS_PCH_SPLIT(dev))
 		dev_priv->regfile.saveDPLL_A_MD = I915_READ(_DPLL_A_MD);
 	dev_priv->regfile.saveHTOTAL_A = I915_READ(_HTOTAL_A);
 	dev_priv->regfile.saveHBLANK_A = I915_READ(_HBLANK_A);
@@ -162,7 +162,7 @@ void i915_save_display_reg(struct drm_device *dev)
 	dev_priv->regfile.saveDSPASIZE = I915_READ(_DSPASIZE);
 	dev_priv->regfile.saveDSPAPOS = I915_READ(_DSPAPOS);
 	dev_priv->regfile.saveDSPAADDR = I915_READ(_DSPAADDR);
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		dev_priv->regfile.saveDSPASURF = I915_READ(_DSPASURF);
 		dev_priv->regfile.saveDSPATILEOFF = I915_READ(_DSPATILEOFF);
 	}
@@ -181,7 +181,7 @@ void i915_save_display_reg(struct drm_device *dev)
 		dev_priv->regfile.saveFPB1 = I915_READ(_FPB1);
 		dev_priv->regfile.saveDPLL_B = I915_READ(_DPLL_B);
 	}
-	if (dev_priv->info->gen >= 4 && !HAS_PCH_SPLIT(dev))
+	if (dev_priv->info.gen >= 4 && !HAS_PCH_SPLIT(dev))
 		dev_priv->regfile.saveDPLL_B_MD = I915_READ(_DPLL_B_MD);
 	dev_priv->regfile.saveHTOTAL_B = I915_READ(_HTOTAL_B);
 	dev_priv->regfile.saveHBLANK_B = I915_READ(_HBLANK_B);
@@ -219,7 +219,7 @@ void i915_save_display_reg(struct drm_device *dev)
 	dev_priv->regfile.saveDSPBSIZE = I915_READ(_DSPBSIZE);
 	dev_priv->regfile.saveDSPBPOS = I915_READ(_DSPBPOS);
 	dev_priv->regfile.saveDSPBADDR = I915_READ(_DSPBADDR);
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		dev_priv->regfile.saveDSPBSURF = I915_READ(_DSPBSURF);
 		dev_priv->regfile.saveDSPBTILEOFF = I915_READ(_DSPBTILEOFF);
 	}
@@ -227,7 +227,7 @@ void i915_save_display_reg(struct drm_device *dev)
 	dev_priv->regfile.savePIPEBSTAT = I915_READ(_PIPEBSTAT);
 
 	/* Fences */
-	switch (dev_priv->info->gen) {
+	switch (dev_priv->info.gen) {
 	case 7:
 	case 6:
 		for (i = 0; i < 16; i++)
@@ -278,7 +278,7 @@ void i915_save_display_reg(struct drm_device *dev)
 		dev_priv->regfile.saveBLC_CPU_PWM_CTL2 = I915_READ(BLC_PWM_CPU_CTL2);
 	} else {
 		dev_priv->regfile.saveBLC_PWM_CTL = I915_READ(BLC_PWM_CTL);
-		if (dev_priv->info->gen >= 4)
+		if (dev_priv->info.gen >= 4)
 			dev_priv->regfile.saveBLC_PWM_CTL2 = I915_READ(BLC_PWM_CTL2);
 	}
 
@@ -302,7 +302,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 		I915_WRITE(BLC_PWM_CPU_CTL2, dev_priv->regfile.saveBLC_CPU_PWM_CTL2);
 		I915_WRITE(BLC_PWM_CPU_CTL, dev_priv->regfile.saveBLC_CPU_PWM_CTL);
 	} else {
-		if (dev_priv->info->gen >= 4)
+		if (dev_priv->info.gen >= 4)
 			I915_WRITE(BLC_PWM_CTL2, dev_priv->regfile.saveBLC_PWM_CTL2);
 		I915_WRITE(BLC_PWM_CTL, dev_priv->regfile.saveBLC_PWM_CTL);
 	}
@@ -320,7 +320,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 	}
 
 	/* Fences */
-	switch (dev_priv->info->gen) {
+	switch (dev_priv->info.gen) {
 	case 7:
 	case 6:
 		for (i = 0; i < 16; i++)
@@ -377,7 +377,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 	I915_WRITE(dpll_a_reg, dev_priv->regfile.saveDPLL_A);
 	POSTING_READ(dpll_a_reg);
 	udelay(150);
-	if (dev_priv->info->gen >= 4 && !HAS_PCH_SPLIT(dev)) {
+	if (dev_priv->info.gen >= 4 && !HAS_PCH_SPLIT(dev)) {
 		I915_WRITE(_DPLL_A_MD, dev_priv->regfile.saveDPLL_A_MD);
 		POSTING_READ(_DPLL_A_MD);
 	}
@@ -421,7 +421,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 	I915_WRITE(_PIPEASRC, dev_priv->regfile.savePIPEASRC);
 	I915_WRITE(_DSPAADDR, dev_priv->regfile.saveDSPAADDR);
 	I915_WRITE(_DSPASTRIDE, dev_priv->regfile.saveDSPASTRIDE);
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		I915_WRITE(_DSPASURF, dev_priv->regfile.saveDSPASURF);
 		I915_WRITE(_DSPATILEOFF, dev_priv->regfile.saveDSPATILEOFF);
 	}
@@ -446,7 +446,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 	I915_WRITE(dpll_b_reg, dev_priv->regfile.saveDPLL_B);
 	POSTING_READ(dpll_b_reg);
 	udelay(150);
-	if (dev_priv->info->gen >= 4 && !HAS_PCH_SPLIT(dev)) {
+	if (dev_priv->info.gen >= 4 && !HAS_PCH_SPLIT(dev)) {
 		I915_WRITE(_DPLL_B_MD, dev_priv->regfile.saveDPLL_B_MD);
 		POSTING_READ(_DPLL_B_MD);
 	}
@@ -490,7 +490,7 @@ void i915_restore_display_reg(struct drm_device *dev)
 	I915_WRITE(_PIPEBSRC, dev_priv->regfile.savePIPEBSRC);
 	I915_WRITE(_DSPBADDR, dev_priv->regfile.saveDSPBADDR);
 	I915_WRITE(_DSPBSTRIDE, dev_priv->regfile.saveDSPBSTRIDE);
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		I915_WRITE(_DSPBSURF, dev_priv->regfile.saveDSPBSURF);
 		I915_WRITE(_DSPBTILEOFF, dev_priv->regfile.saveDSPBTILEOFF);
 	}

@@ -60,7 +60,7 @@ static unsigned long i915_stolen_to_physical(struct drm_device *dev)
 	 * XXX However gen2 requires an unavailable symbol.
 	 */
 	base = 0;
-	if (dev_priv->info->gen >= 3) {
+	if (dev_priv->info.gen >= 3) {
 		/* Read Graphics Base of Stolen Memory directly */
 		pci_read_config_dword(dev->pdev, 0x5c, &base);
 		base &= ~((1<<20) - 1);

@@ -94,7 +94,7 @@ i915_gem_detect_bit_6_swizzle(struct drm_device *dev)
 	if (IS_VALLEYVIEW(dev)) {
 		swizzle_x = I915_BIT_6_SWIZZLE_NONE;
 		swizzle_y = I915_BIT_6_SWIZZLE_NONE;
-	} else if (dev_priv->info->gen >= 6) {
+	} else if (dev_priv->info.gen >= 6) {
 		uint32_t dimm_c0, dimm_c1;
 		dimm_c0 = I915_READ(MAD_DIMM_C0);
 		dimm_c1 = I915_READ(MAD_DIMM_C1);
@@ -220,10 +220,10 @@ i915_tiling_ok(struct drm_device *dev, int stride, int size, int tiling_mode)
 	/* check maximum stride & object size */
 	/* i965+ stores the end address of the gtt mapping in the fence
 	 * reg, so dont bother to check the size */
-	if (dev_priv->info->gen >= 7) {
+	if (dev_priv->info.gen >= 7) {
 		if (stride / 128 > GEN7_FENCE_MAX_PITCH_VAL)
 			return false;
-	} else if (dev_priv->info->gen >= 4) {
+	} else if (dev_priv->info.gen >= 4) {
 		if (stride / 128 > I965_FENCE_MAX_PITCH_VAL)
 			return false;
 	} else {
@@ -243,7 +243,7 @@ i915_tiling_ok(struct drm_device *dev, int stride, int size, int tiling_mode)
 		return false;
 
 	/* 965+ just needs multiples of tile width */
-	if (dev_priv->info->gen >= 4) {
+	if (dev_priv->info.gen >= 4) {
 		if (stride & (tile_width - 1))
 			return false;
 		return true;
@@ -266,10 +266,10 @@ i915_gem_object_fence_ok(struct drm_i915_gem_object *obj, int tiling_mode)
 	if (tiling_mode == I915_TILING_NONE)
 		return true;
 
-	if (dev_priv->info->gen >= 4)
+	if (dev_priv->info.gen >= 4)
 		return true;
 
-	if (dev_priv->info->gen == 3) {
+	if (dev_priv->info.gen == 3) {
 		if (i915_gem_obj_ggtt_offset(obj) & ~I915_FENCE_START_MASK)
 			return false;
 	} else {

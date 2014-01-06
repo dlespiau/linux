@@ -276,7 +276,7 @@ int intel_fbdev_init(struct drm_device *dev)
 	ifbdev->helper.funcs = &intel_fb_helper_funcs;
 
 	ret = drm_fb_helper_init(dev, &ifbdev->helper,
-				 dev_priv->info->num_pipes,
+				 dev_priv->info.num_pipes,
 				 4);
 	if (ret) {
 		kfree(ifbdev);
@@ -341,7 +341,7 @@ void intel_fbdev_restore_mode(struct drm_device *dev)
 	int ret;
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
-	if (dev_priv->info->num_pipes == 0)
+	if (dev_priv->info.num_pipes == 0)
 		return;
 
 	drm_modeset_lock_all(dev);
