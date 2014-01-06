@@ -1772,8 +1772,6 @@ struct drm_i915_file_private {
 	atomic_t rps_wait_boost;
 };
 
-#define INTEL_INFO(dev)	(to_i915(dev)->info)
-
 #define IS_I830(dev)		((dev)->pdev->device == 0x3577)
 #define IS_845G(dev)		((dev)->pdev->device == 0x2562)
 #define IS_I85X(dev)		(to_i915(dev)->info->is_i85x)
