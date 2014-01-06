@@ -1791,7 +1791,7 @@ static struct i915_vma *__i915_gem_vma_create(struct drm_i915_gem_object *obj,
 	vma->vm = vm;
 	vma->obj = obj;
 
-	switch (INTEL_INFO(vm->dev)->gen) {
+	switch (to_i915(vm->dev)->info->gen) {
 	case 8:
 	case 7:
 	case 6:

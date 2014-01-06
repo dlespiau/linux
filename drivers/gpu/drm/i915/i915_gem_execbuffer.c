@@ -545,7 +545,7 @@ i915_gem_execbuffer_reserve_vma(struct i915_vma *vma,
 {
 	struct drm_i915_gem_object *obj = vma->obj;
 	struct drm_i915_gem_exec_object2 *entry = vma->exec_entry;
-	bool has_fenced_gpu_access = INTEL_INFO(ring->dev)->gen < 4;
+	bool has_fenced_gpu_access = to_i915(ring->dev)->info->gen < 4;
 	bool need_fence, need_mappable;
 	u32 flags = (entry->flags & EXEC_OBJECT_NEEDS_GTT) &&
 		!vma->obj->has_global_gtt_mapping ? GLOBAL_BIND : 0;
@@ -601,7 +601,7 @@ i915_gem_execbuffer_reserve(struct intel_ring_buffer *ring,
 	struct i915_vma *vma;
 	struct i915_address_space *vm;
 	struct list_head ordered_vmas;
-	bool has_fenced_gpu_access = INTEL_INFO(ring->dev)->gen < 4;
+	bool has_fenced_gpu_access = to_i915(ring->dev)->info->gen < 4;
 	int retry;
 
 	if (list_empty(vmas))

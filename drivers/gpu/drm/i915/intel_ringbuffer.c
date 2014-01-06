@@ -413,7 +413,7 @@ static void ring_write_tail(struct intel_ring_buffer *ring,
 u32 intel_ring_get_active_head(struct intel_ring_buffer *ring)
 {
 	drm_i915_private_t *dev_priv = ring->dev->dev_private;
-	u32 acthd_reg = INTEL_INFO(ring->dev)->gen >= 4 ?
+	u32 acthd_reg = dev_priv->info->gen >= 4 ?
 			RING_ACTHD(ring->mmio_base) : ACTHD;
 
 	return I915_READ(acthd_reg);
@@ -425,7 +425,7 @@ static void ring_setup_phys_status_page(struct intel_ring_buffer *ring)
 	u32 addr;
 
 	addr = dev_priv->status_page_dmah->busaddr;
-	if (INTEL_INFO(ring->dev)->gen >= 4)
+	if (dev_priv->info->gen >= 4)
 		addr |= (dev_priv->status_page_dmah->busaddr >> 28) & 0xf0;
 	I915_WRITE(HWS_PGA, addr);
 }
@@ -1653,7 +1653,7 @@ void intel_ring_init_seqno(struct intel_ring_buffer *ring, u32 seqno)
 
 	BUG_ON(ring->outstanding_lazy_seqno);
 
-	if (INTEL_INFO(ring->dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		I915_WRITE(RING_SYNC_0(ring->mmio_base), 0);
 		I915_WRITE(RING_SYNC_1(ring->mmio_base), 0);
 		if (HAS_VEBOX(ring->dev))
@@ -1700,6 +1700,7 @@ static void gen6_bsd_ring_write_tail(struct intel_ring_buffer *ring,
 static int gen6_bsd_ring_flush(struct intel_ring_buffer *ring,
 			       u32 invalidate, u32 flush)
 {
+	drm_i915_private_t *dev_priv = ring->dev->dev_private;
 	uint32_t cmd;
 	int ret;
 
@@ -1708,7 +1709,7 @@ static int gen6_bsd_ring_flush(struct intel_ring_buffer *ring,
 		return ret;
 
 	cmd = MI_FLUSH_DW;
-	if (INTEL_INFO(ring->dev)->gen >= 8)
+	if (dev_priv->info->gen >= 8)
 		cmd += 1;
 	/*
 	 * Bspec vol 1c.5 - video engine command streamer:
@@ -1721,7 +1722,7 @@ static int gen6_bsd_ring_flush(struct intel_ring_buffer *ring,
 			MI_FLUSH_DW_STORE_INDEX | MI_FLUSH_DW_OP_STOREDW;
 	intel_ring_emit(ring, cmd);
 	intel_ring_emit(ring, I915_GEM_HWS_SCRATCH_ADDR | MI_FLUSH_DW_USE_GTT);
-	if (INTEL_INFO(ring->dev)->gen >= 8) {
+	if (dev_priv->info->gen >= 8) {
 		intel_ring_emit(ring, 0); /* upper addr */
 		intel_ring_emit(ring, 0); /* value */
 	} else  {
@@ -1804,6 +1805,7 @@ static int gen6_ring_flush(struct intel_ring_buffer *ring,
 			   u32 invalidate, u32 flush)
 {
 	struct drm_device *dev = ring->dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	uint32_t cmd;
 	int ret;
 
@@ -1812,7 +1814,7 @@ static int gen6_ring_flush(struct intel_ring_buffer *ring,
 		return ret;
 
 	cmd = MI_FLUSH_DW;
-	if (INTEL_INFO(ring->dev)->gen >= 8)
+	if (dev_priv->info->gen >= 8)
 		cmd += 1;
 	/*
 	 * Bspec vol 1c.3 - blitter engine command streamer:
@@ -1825,7 +1827,7 @@ static int gen6_ring_flush(struct intel_ring_buffer *ring,
 			MI_FLUSH_DW_OP_STOREDW;
 	intel_ring_emit(ring, cmd);
 	intel_ring_emit(ring, I915_GEM_HWS_SCRATCH_ADDR | MI_FLUSH_DW_USE_GTT);
-	if (INTEL_INFO(ring->dev)->gen >= 8) {
+	if (dev_priv->info->gen >= 8) {
 		intel_ring_emit(ring, 0); /* upper addr */
 		intel_ring_emit(ring, 0); /* value */
 	} else  {

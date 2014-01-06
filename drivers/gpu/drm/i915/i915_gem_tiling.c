@@ -260,15 +260,16 @@ i915_tiling_ok(struct drm_device *dev, int stride, int size, int tiling_mode)
 static bool
 i915_gem_object_fence_ok(struct drm_i915_gem_object *obj, int tiling_mode)
 {
+	struct drm_i915_private *dev_priv = to_i915(obj->base.dev);
 	u32 size;
 
 	if (tiling_mode == I915_TILING_NONE)
 		return true;
 
-	if (INTEL_INFO(obj->base.dev)->gen >= 4)
+	if (dev_priv->info->gen >= 4)
 		return true;
 
-	if (INTEL_INFO(obj->base.dev)->gen == 3) {
+	if (dev_priv->info->gen == 3) {
 		if (i915_gem_obj_ggtt_offset(obj) & ~I915_FENCE_START_MASK)
 			return false;
 	} else {
