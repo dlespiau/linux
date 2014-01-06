@@ -77,7 +77,7 @@ enum plane {
 };
 #define plane_name(p) ((p) + 'A')
 
-#define sprite_name(p, s) ((p) * dev_priv->num_plane + (s) + 'A')
+#define sprite_name(p, s) ((p) * dev_priv->info.num_sprites + (s) + 'A')
 
 enum port {
 	PORT_A = 0,
@@ -504,6 +504,7 @@ struct intel_uncore {
 struct intel_device_info {
 	u32 display_mmio_offset;
 	u8 num_pipes:3;
+	u8 num_sprites:2;
 	u8 gen;
 	u8 ring_mask; /* Rings supported by the HW */
 	DEV_INFO_FOR_EACH_FLAG(DEFINE_FLAG, SEP_SEMICOLON);
@@ -1422,8 +1423,6 @@ typedef struct drm_i915_private {
 	} hpd_stats[HPD_NUM_PINS];
 	u32 hpd_event_bits;
 	struct timer_list hotplug_reenable_timer;
-
-	int num_plane;
 
 	struct i915_fbc fbc;
 	struct intel_opregion opregion;
