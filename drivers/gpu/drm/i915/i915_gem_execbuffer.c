@@ -265,6 +265,7 @@ relocate_entry_cpu(struct drm_i915_gem_object *obj,
 		   struct drm_i915_gem_relocation_entry *reloc)
 {
 	struct drm_device *dev = obj->base.dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	uint32_t page_offset = offset_in_page(reloc->offset);
 	char *vaddr;
 	int ret = -EINVAL;
@@ -277,7 +278,7 @@ relocate_entry_cpu(struct drm_i915_gem_object *obj,
 				reloc->offset >> PAGE_SHIFT));
 	*(uint32_t *)(vaddr + page_offset) = reloc->delta;
 
-	if (INTEL_INFO(dev)->gen >= 8) {
+	if (dev_priv->info->gen >= 8) {
 		page_offset = offset_in_page(page_offset + sizeof(uint32_t));
 
 		if (page_offset == 0) {
@@ -320,7 +321,7 @@ relocate_entry_gtt(struct drm_i915_gem_object *obj,
 		(reloc_page + offset_in_page(reloc->offset));
 	iowrite32(reloc->delta, reloc_entry);
 
-	if (INTEL_INFO(dev)->gen >= 8) {
+	if (dev_priv->info->gen >= 8) {
 		reloc_entry += 1;
 
 		if (offset_in_page(reloc->offset + sizeof(uint32_t)) == 0) {
@@ -345,6 +346,7 @@ i915_gem_execbuffer_relocate_entry(struct drm_i915_gem_object *obj,
 				   struct drm_i915_gem_relocation_entry *reloc)
 {
 	struct drm_device *dev = obj->base.dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct drm_gem_object *target_obj;
 	struct drm_i915_gem_object *target_i915_obj;
 	struct i915_vma *target_vma;
@@ -406,7 +408,7 @@ i915_gem_execbuffer_relocate_entry(struct drm_i915_gem_object *obj,
 
 	/* Check that the relocation address is valid... */
 	if (unlikely(reloc->offset >
-		obj->base.size - (INTEL_INFO(dev)->gen >= 8 ? 8 : 4))) {
+		obj->base.size - (dev_priv->info->gen >= 8 ? 8 : 4))) {
 		DRM_DEBUG("Relocation beyond object bounds: "
 			  "obj %p target %d offset %d size %d.\n",
 			  obj, reloc->target_handle,
@@ -1058,15 +1060,15 @@ i915_gem_do_execbuffer(struct drm_device *dev, void *data,
 	case I915_EXEC_CONSTANTS_REL_SURFACE:
 		if (ring == &dev_priv->ring[RCS] &&
 		    mode != dev_priv->relative_constants_mode) {
-			if (INTEL_INFO(dev)->gen < 4)
+			if (dev_priv->info->gen < 4)
 				return -EINVAL;
 
-			if (INTEL_INFO(dev)->gen > 5 &&
+			if (dev_priv->info->gen > 5 &&
 			    mode == I915_EXEC_CONSTANTS_REL_SURFACE)
 				return -EINVAL;
 
 			/* The HW changed the meaning on this bit on gen6 */
-			if (INTEL_INFO(dev)->gen >= 6)
+			if (dev_priv->info->gen >= 6)
 				mask &= ~I915_EXEC_CONSTANTS_REL_SURFACE;
 		}
 		break;
@@ -1086,7 +1088,7 @@ i915_gem_do_execbuffer(struct drm_device *dev, void *data,
 			return -EINVAL;
 		}
 
-		if (INTEL_INFO(dev)->gen >= 5) {
+		if (dev_priv->info->gen >= 5) {
 			DRM_DEBUG("clip rectangles are only valid on pre-gen5\n");
 			return -EINVAL;
 		}
@@ -1278,6 +1280,7 @@ int
 i915_gem_execbuffer(struct drm_device *dev, void *data,
 		    struct drm_file *file)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct drm_i915_gem_execbuffer *args = data;
 	struct drm_i915_gem_execbuffer2 exec2;
 	struct drm_i915_gem_exec_object *exec_list = NULL;
@@ -1316,7 +1319,7 @@ i915_gem_execbuffer(struct drm_device *dev, void *data,
 		exec2_list[i].relocs_ptr = exec_list[i].relocs_ptr;
 		exec2_list[i].alignment = exec_list[i].alignment;
 		exec2_list[i].offset = exec_list[i].offset;
-		if (INTEL_INFO(dev)->gen < 4)
+		if (dev_priv->info->gen < 4)
 			exec2_list[i].flags = EXEC_OBJECT_NEEDS_FENCE;
 		else
 			exec2_list[i].flags = 0;

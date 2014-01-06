@@ -506,7 +506,7 @@ void intel_update_fbc(struct drm_device *dev)
 	adjusted_mode = &intel_crtc->config.adjusted_mode;
 
 	if (i915_enable_fbc < 0 &&
-	    INTEL_INFO(dev)->gen <= 7 && !IS_HASWELL(dev)) {
+	    dev_priv->info->gen <= 7 && !IS_HASWELL(dev)) {
 		if (set_no_fbc_reason(dev_priv, FBC_CHIP_DEFAULT))
 			DRM_DEBUG_KMS("disabled per chip default\n");
 		goto out_disable;
@@ -524,7 +524,7 @@ void intel_update_fbc(struct drm_device *dev)
 		goto out_disable;
 	}
 
-	if (IS_G4X(dev) || INTEL_INFO(dev)->gen >= 5) {
+	if (IS_G4X(dev) || dev_priv->info->gen >= 5) {
 		max_width = 4096;
 		max_height = 2048;
 	} else {
@@ -537,7 +537,7 @@ void intel_update_fbc(struct drm_device *dev)
 			DRM_DEBUG_KMS("mode too large for compression, disabling\n");
 		goto out_disable;
 	}
-	if ((INTEL_INFO(dev)->gen < 4 || IS_HASWELL(dev)) &&
+	if ((dev_priv->info->gen < 4 || IS_HASWELL(dev)) &&
 	    intel_crtc->plane != PLANE_A) {
 		if (set_no_fbc_reason(dev_priv, FBC_BAD_PLANE))
 			DRM_DEBUG_KMS("plane not A, disabling compression\n");
@@ -2024,14 +2024,14 @@ static void intel_read_wm_latency(struct drm_device *dev, uint16_t wm[5])
 		wm[2] = (sskpd >> 12) & 0xFF;
 		wm[3] = (sskpd >> 20) & 0x1FF;
 		wm[4] = (sskpd >> 32) & 0x1FF;
-	} else if (INTEL_INFO(dev)->gen >= 6) {
+	} else if (dev_priv->info->gen >= 6) {
 		uint32_t sskpd = I915_READ(MCH_SSKPD);
 
 		wm[0] = (sskpd >> SSKPD_WM0_SHIFT) & SSKPD_WM_MASK;
 		wm[1] = (sskpd >> SSKPD_WM1_SHIFT) & SSKPD_WM_MASK;
 		wm[2] = (sskpd >> SSKPD_WM2_SHIFT) & SSKPD_WM_MASK;
 		wm[3] = (sskpd >> SSKPD_WM3_SHIFT) & SSKPD_WM_MASK;
-	} else if (INTEL_INFO(dev)->gen >= 5) {
+	} else if (dev_priv->info->gen >= 5) {
 		uint32_t mltr = I915_READ(MLTR_ILK);
 
 		/* ILK primary LP0 latency is 700 ns */
@@ -2051,8 +2051,10 @@ intel_fixup_spr_wm_latency(struct drm_i915_private *dev_priv, uint16_t wm[5])
 
 static void intel_fixup_cur_wm_latency(struct drm_device *dev, uint16_t wm[5])
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
 	/* ILK cursor LP0 latency is 1300 ns */
-	if (INTEL_INFO(dev)->gen == 5)
+	if (dev_priv->info->gen == 5)
 		wm[0] = 13;
 
 	/* WaDoubleCursorLP3Latency:ivb */
@@ -2062,10 +2064,12 @@ static void intel_fixup_cur_wm_latency(struct drm_device *dev, uint16_t wm[5])
 
 static int ilk_wm_max_level(const struct drm_device *dev)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
 	/* how many WM levels are we expecting */
 	if (IS_HASWELL(dev))
 		return 4;
-	else if (INTEL_INFO(dev)->gen >= 6)
+	else if (dev_priv->info->gen >= 6)
 		return 3;
 	else
 		return 2;
@@ -2171,7 +2175,7 @@ static bool intel_compute_pipe_wm(struct drm_crtc *crtc,
 	ilk_compute_wm_maximums(dev_priv, 0, &config, INTEL_DDB_PART_1_2, &max);
 
 	/* ILK/SNB: LP2+ watermarks only w/o sprites */
-	if (INTEL_INFO(dev)->gen <= 6 && params->spr.enabled)
+	if (dev_priv->info->gen <= 6 && params->spr.enabled)
 		max_level = 1;
 
 	/* ILK/SNB/IVB: LP1+ watermarks only w/o scaling */
@@ -2222,15 +2226,16 @@ static void ilk_wm_merge(struct drm_device *dev,
 			 const struct ilk_wm_maximums *max,
 			 struct intel_pipe_wm *merged)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	int level, max_level = ilk_wm_max_level(dev);
 
 	/* ILK/SNB/IVB: LP1+ watermarks only w/ single pipe */
-	if ((INTEL_INFO(dev)->gen <= 6 || IS_IVYBRIDGE(dev)) &&
+	if ((dev_priv->info->gen <= 6 || IS_IVYBRIDGE(dev)) &&
 	    config->num_pipes_active > 1)
 		return;
 
 	/* ILK: FBC WM must be disabled always */
-	merged->fbc_wm_enabled = INTEL_INFO(dev)->gen >= 6;
+	merged->fbc_wm_enabled = dev_priv->info->gen >= 6;
 
 	/* merge each WM1+ level */
 	for (level = 1; level <= max_level; level++) {
@@ -2288,6 +2293,7 @@ static void ilk_compute_wm_results(struct drm_device *dev,
 				   enum intel_ddb_partitioning partitioning,
 				   struct ilk_wm_values *results)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_crtc *intel_crtc;
 	int level, wm_lp;
 
@@ -2309,14 +2315,14 @@ static void ilk_compute_wm_results(struct drm_device *dev,
 			(r->pri_val << WM1_LP_SR_SHIFT) |
 			r->cur_val;
 
-		if (INTEL_INFO(dev)->gen >= 8)
+		if (dev_priv->info->gen >= 8)
 			results->wm_lp[wm_lp - 1] |=
 				r->fbc_val << WM1_LP_FBC_SHIFT_BDW;
 		else
 			results->wm_lp[wm_lp - 1] |=
 				r->fbc_val << WM1_LP_FBC_SHIFT;
 
-		if (INTEL_INFO(dev)->gen <= 6 && r->spr_val) {
+		if (dev_priv->info->gen <= 6 && r->spr_val) {
 			WARN_ON(wm_lp != 1);
 			results->wm_lp_spr[wm_lp - 1] = WM1S_LP_EN | r->spr_val;
 		} else
@@ -2522,7 +2528,7 @@ static void ilk_write_wm_values(struct drm_i915_private *dev_priv,
 	    previous->wm_lp_spr[0] != results->wm_lp_spr[0])
 		I915_WRITE(WM1S_LP_ILK, results->wm_lp_spr[0]);
 
-	if (INTEL_INFO(dev)->gen >= 7) {
+	if (dev_priv->info->gen >= 7) {
 		if (dirty & WM_DIRTY_LP(2) && previous->wm_lp_spr[1] != results->wm_lp_spr[1])
 			I915_WRITE(WM2S_LP_IVB, results->wm_lp_spr[1]);
 		if (dirty & WM_DIRTY_LP(3) && previous->wm_lp_spr[2] != results->wm_lp_spr[2])
@@ -2572,7 +2578,7 @@ static void ilk_update_wm(struct drm_crtc *crtc)
 	ilk_wm_merge(dev, &config, &max, &lp_wm_1_2);
 
 	/* 5/6 split only in single pipe config on IVB+ */
-	if (INTEL_INFO(dev)->gen >= 7 &&
+	if (dev_priv->info->gen >= 7 &&
 	    config.num_pipes_active == 1 && config.sprites_enabled) {
 		ilk_compute_wm_maximums(dev_priv, 1, &config, INTEL_DDB_PART_5_6, &max);
 		ilk_wm_merge(dev, &config, &max, &lp_wm_5_6);
@@ -3163,8 +3169,10 @@ static void intel_print_rc6_info(struct drm_device *dev, u32 mode)
 
 int intel_enable_rc6(const struct drm_device *dev)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
 	/* No RC6 before Ironlake */
-	if (INTEL_INFO(dev)->gen < 5)
+	if (dev_priv->info->gen < 5)
 		return 0;
 
 	/* Respect the kernel parameter if it is set */
@@ -3172,14 +3180,14 @@ int intel_enable_rc6(const struct drm_device *dev)
 		return i915_enable_rc6;
 
 	/* Disable RC6 on Ironlake */
-	if (INTEL_INFO(dev)->gen == 5)
+	if (dev_priv->info->gen == 5)
 		return 0;
 
 	if (IS_HASWELL(dev))
 		return INTEL_RC6_ENABLE;
 
 	/* snb/ivb have more than one rc6 state. */
-	if (INTEL_INFO(dev)->gen == 6)
+	if (dev_priv->info->gen == 6)
 		return INTEL_RC6_ENABLE;
 
 	return (INTEL_RC6_ENABLE | INTEL_RC6p_ENABLE);
@@ -3202,7 +3210,7 @@ static void gen6_enable_rps_interrupts(struct drm_device *dev)
 	/* IVB and SNB hard hangs on looping batchbuffer
 	 * if GEN6_PM_UP_EI_EXPIRED is masked.
 	 */
-	if (INTEL_INFO(dev)->gen <= 7 && !IS_HASWELL(dev))
+	if (dev_priv->info->gen <= 7 && !IS_HASWELL(dev))
 		enabled_intrs |= GEN6_PM_RP_UP_EI_EXPIRED;
 
 	I915_WRITE(GEN6_PMINTRMSK, ~enabled_intrs);
@@ -3442,7 +3450,7 @@ void gen6_update_ring_freq(struct drm_device *dev)
 		int diff = dev_priv->rps.max_delay - gpu_freq;
 		unsigned int ia_freq = 0, ring_freq = 0;
 
-		if (INTEL_INFO(dev)->gen >= 8) {
+		if (dev_priv->info->gen >= 8) {
 			/* max(2 * GT, DDR). NB: GT is 50MHz units */
 			ring_freq = max(min_ring_freq, gpu_freq);
 		} else if (IS_HASWELL(dev)) {
@@ -4368,7 +4376,7 @@ void intel_disable_gt_powersave(struct drm_device *dev)
 	if (IS_IRONLAKE_M(dev)) {
 		ironlake_disable_drps(dev);
 		ironlake_disable_rc6(dev);
-	} else if (INTEL_INFO(dev)->gen >= 6) {
+	} else if (dev_priv->info->gen >= 6) {
 		cancel_delayed_work_sync(&dev_priv->rps.delayed_resume_work);
 		cancel_work_sync(&dev_priv->rps.work);
 		mutex_lock(&dev_priv->rps.hw_lock);
@@ -5545,11 +5553,11 @@ void intel_init_pm(struct drm_device *dev)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
 	if (I915_HAS_FBC(dev)) {
-		if (INTEL_INFO(dev)->gen >= 7) {
+		if (dev_priv->info->gen >= 7) {
 			dev_priv->display.fbc_enabled = ironlake_fbc_enabled;
 			dev_priv->display.enable_fbc = gen7_enable_fbc;
 			dev_priv->display.disable_fbc = ironlake_disable_fbc;
-		} else if (INTEL_INFO(dev)->gen >= 5) {
+		} else if (dev_priv->info->gen >= 5) {
 			dev_priv->display.fbc_enabled = ironlake_fbc_enabled;
 			dev_priv->display.enable_fbc = ironlake_enable_fbc;
 			dev_priv->display.disable_fbc = ironlake_disable_fbc;
@@ -5629,7 +5637,7 @@ void intel_init_pm(struct drm_device *dev)
 				dev_priv->display.update_wm = NULL;
 			}
 			dev_priv->display.init_clock_gating = haswell_init_clock_gating;
-		} else if (INTEL_INFO(dev)->gen == 8) {
+		} else if (dev_priv->info->gen == 8) {
 			dev_priv->display.init_clock_gating = gen8_init_clock_gating;
 		} else
 			dev_priv->display.update_wm = NULL;

@@ -1254,13 +1254,13 @@ static void intel_sdvo_mode_set(struct intel_encoder *intel_encoder)
 		return;
 
 	/* Set the SDVO control regs. */
-	if (INTEL_INFO(dev)->gen >= 4) {
+	if (dev_priv->info->gen >= 4) {
 		/* The real mode polarity is set by the SDVO commands, using
 		 * struct intel_sdvo_dtd. */
 		sdvox = SDVO_VSYNC_ACTIVE_HIGH | SDVO_HSYNC_ACTIVE_HIGH;
 		if (!HAS_PCH_SPLIT(dev) && intel_sdvo->is_hdmi)
 			sdvox |= intel_sdvo->color_range;
-		if (INTEL_INFO(dev)->gen < 5)
+		if (dev_priv->info->gen < 5)
 			sdvox |= SDVO_BORDER_ENABLE;
 	} else {
 		sdvox = I915_READ(intel_sdvo->sdvo_reg);
@@ -1283,7 +1283,7 @@ static void intel_sdvo_mode_set(struct intel_encoder *intel_encoder)
 	if (intel_sdvo->has_hdmi_audio)
 		sdvox |= SDVO_AUDIO_ENABLE;
 
-	if (INTEL_INFO(dev)->gen >= 4) {
+	if (dev_priv->info->gen >= 4) {
 		/* done in crtc_mode_set as the dpll_md reg must be written early */
 	} else if (IS_I945G(dev) || IS_I945GM(dev) || IS_G33(dev)) {
 		/* done in crtc_mode_set as it lives inside the dpll register */
@@ -1293,7 +1293,7 @@ static void intel_sdvo_mode_set(struct intel_encoder *intel_encoder)
 	}
 
 	if (input_dtd.part2.sdvo_flags & SDVO_NEED_TO_STALL &&
-	    INTEL_INFO(dev)->gen < 5)
+	    dev_priv->info->gen < 5)
 		sdvox |= SDVO_STALL_SELECT;
 	intel_sdvo_write_sdvox(intel_sdvo, sdvox);
 }
@@ -2407,9 +2407,10 @@ intel_sdvo_add_hdmi_properties(struct intel_sdvo *intel_sdvo,
 			       struct intel_sdvo_connector *connector)
 {
 	struct drm_device *dev = connector->base.base.dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 
 	intel_attach_force_audio_property(&connector->base.base);
-	if (INTEL_INFO(dev)->gen >= 4 && IS_MOBILE(dev)) {
+	if (dev_priv->info->gen >= 4 && IS_MOBILE(dev)) {
 		intel_attach_broadcast_rgb_property(&connector->base.base);
 		intel_sdvo->color_range_auto = true;
 	}

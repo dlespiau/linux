@@ -238,6 +238,8 @@ static void i915_ring_error_state(struct drm_i915_error_state_buf *m,
 				  struct drm_i915_error_state *error,
 				  unsigned ring)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
 	BUG_ON(ring >= I915_NUM_RINGS); /* shut up confused gcc */
 	err_printf(m, "%s command stream:\n", ring_str(ring));
 	err_printf(m, "  HEAD: 0x%08x\n", error->head[ring]);
@@ -247,14 +249,14 @@ static void i915_ring_error_state(struct drm_i915_error_state_buf *m,
 	err_printf(m, "  IPEIR: 0x%08x\n", error->ipeir[ring]);
 	err_printf(m, "  IPEHR: 0x%08x\n", error->ipehr[ring]);
 	err_printf(m, "  INSTDONE: 0x%08x\n", error->instdone[ring]);
-	if (INTEL_INFO(dev)->gen >= 4) {
+	if (dev_priv->info->gen >= 4) {
 		err_printf(m, "  BBADDR: 0x%08llx\n", error->bbaddr[ring]);
 		err_printf(m, "  BB_STATE: 0x%08x\n", error->bbstate[ring]);
 		err_printf(m, "  INSTPS: 0x%08x\n", error->instps[ring]);
 	}
 	err_printf(m, "  INSTPM: 0x%08x\n", error->instpm[ring]);
 	err_printf(m, "  FADDR: 0x%08x\n", error->faddr[ring]);
-	if (INTEL_INFO(dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		err_printf(m, "  RC PSMI: 0x%08x\n", error->rc_psmi[ring]);
 		err_printf(m, "  FAULT_REG: 0x%08x\n", error->fault_reg[ring]);
 		err_printf(m, "  SYNC_0: 0x%08x [last synced 0x%08x]\n",
@@ -320,12 +322,12 @@ int i915_error_state_to_str(struct drm_i915_error_state_buf *m,
 		err_printf(m, "  INSTDONE_%d: 0x%08x\n", i,
 			   error->extra_instdone[i]);
 
-	if (INTEL_INFO(dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		err_printf(m, "ERROR: 0x%08x\n", error->error);
 		err_printf(m, "DONE_REG: 0x%08x\n", error->done_reg);
 	}
 
-	if (INTEL_INFO(dev)->gen == 7)
+	if (dev_priv->info->gen == 7)
 		err_printf(m, "ERR_INT: 0x%08x\n", error->err_int);
 
 	for_each_ring(ring, dev_priv, i)
@@ -628,7 +630,7 @@ static void i915_gem_record_fences(struct drm_device *dev,
 	int i;
 
 	/* Fences */
-	switch (INTEL_INFO(dev)->gen) {
+	switch (dev_priv->info->gen) {
 	case 8:
 	case 7:
 	case 6:
@@ -663,13 +665,13 @@ static bool is_active_vm(struct i915_address_space *vm,
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct i915_hw_ppgtt *ppgtt;
 
-	if (INTEL_INFO(dev)->gen < 7)
+	if (dev_priv->info->gen < 7)
 		return i915_is_ggtt(vm);
 
 	/* FIXME: This ignores that the global gtt vm is also on this list. */
 	ppgtt = container_of(vm, struct i915_hw_ppgtt, base);
 
-	if (INTEL_INFO(dev)->gen >= 8) {
+	if (dev_priv->info->gen >= 8) {
 		u64 pdp0 = (u64)I915_READ(GEN8_RING_PDP_UDW(ring, 0)) << 32;
 		pdp0 |=  I915_READ(GEN8_RING_PDP_LDW(ring, 0));
 		return pdp0 == ppgtt->pd_dma_addr[0];
@@ -740,7 +742,7 @@ static void i915_record_ring_state(struct drm_device *dev,
 {
 	struct drm_i915_private *dev_priv = dev->dev_private;
 
-	if (INTEL_INFO(dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		error->rc_psmi[ring->id] = I915_READ(ring->mmio_base + 0x50);
 		error->fault_reg[ring->id] = I915_READ(RING_FAULT_REG(ring));
 		error->semaphore_mboxes[ring->id][0]
@@ -757,14 +759,14 @@ static void i915_record_ring_state(struct drm_device *dev,
 		error->semaphore_seqno[ring->id][2] = ring->sync_seqno[2];
 	}
 
-	if (INTEL_INFO(dev)->gen >= 4) {
+	if (dev_priv->info->gen >= 4) {
 		error->faddr[ring->id] = I915_READ(RING_DMA_FADD(ring->mmio_base));
 		error->ipeir[ring->id] = I915_READ(RING_IPEIR(ring->mmio_base));
 		error->ipehr[ring->id] = I915_READ(RING_IPEHR(ring->mmio_base));
 		error->instdone[ring->id] = I915_READ(RING_INSTDONE(ring->mmio_base));
 		error->instps[ring->id] = I915_READ(RING_INSTPS(ring->mmio_base));
 		error->bbaddr[ring->id] = I915_READ(RING_BBADDR(ring->mmio_base));
-		if (INTEL_INFO(dev)->gen >= 8)
+		if (dev_priv->info->gen >= 8)
 			error->bbaddr[ring->id] |= (u64) I915_READ(RING_BBADDR_UDW(ring->mmio_base)) << 32;
 		error->bbstate[ring->id] = I915_READ(RING_BBSTATE(ring->mmio_base));
 	} else {
@@ -971,26 +973,26 @@ void i915_capture_error_state(struct drm_device *dev)
 	else
 		error->ier = I915_READ(IER);
 
-	if (INTEL_INFO(dev)->gen >= 6)
+	if (dev_priv->info->gen >= 6)
 		error->derrmr = I915_READ(DERRMR);
 
 	if (IS_VALLEYVIEW(dev))
 		error->forcewake = I915_READ(FORCEWAKE_VLV);
-	else if (INTEL_INFO(dev)->gen >= 7)
+	else if (dev_priv->info->gen >= 7)
 		error->forcewake = I915_READ(FORCEWAKE_MT);
-	else if (INTEL_INFO(dev)->gen == 6)
+	else if (dev_priv->info->gen == 6)
 		error->forcewake = I915_READ(FORCEWAKE);
 
 	if (!HAS_PCH_SPLIT(dev))
 		for_each_pipe(pipe)
 			error->pipestat[pipe] = I915_READ(PIPESTAT(pipe));
 
-	if (INTEL_INFO(dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		error->error = I915_READ(ERROR_GEN6);
 		error->done_reg = I915_READ(DONE_REG);
 	}
 
-	if (INTEL_INFO(dev)->gen == 7)
+	if (dev_priv->info->gen == 7)
 		error->err_int = I915_READ(GEN7_ERR_INT);
 
 	i915_get_extra_instdone(dev, error->extra_instdone);
@@ -1067,7 +1069,7 @@ void i915_get_extra_instdone(struct drm_device *dev, uint32_t *instdone)
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	memset(instdone, 0, sizeof(*instdone) * I915_NUM_INSTDONE_REG);
 
-	switch (INTEL_INFO(dev)->gen) {
+	switch (dev_priv->info->gen) {
 	case 2:
 	case 3:
 		instdone[0] = I915_READ(INSTDONE);

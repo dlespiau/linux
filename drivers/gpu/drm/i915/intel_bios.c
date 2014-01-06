@@ -353,7 +353,9 @@ parse_sdvo_panel_data(struct drm_i915_private *dev_priv,
 static int intel_bios_ssc_frequency(struct drm_device *dev,
 				    bool alternate)
 {
-	switch (INTEL_INFO(dev)->gen) {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
+	switch (dev_priv->info->gen) {
 	case 2:
 		return alternate ? 66667 : 48000;
 	case 3:

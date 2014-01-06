@@ -844,10 +844,11 @@ static void intel_disable_hdmi(struct intel_encoder *encoder)
 static int hdmi_portclock_limit(struct intel_hdmi *hdmi)
 {
 	struct drm_device *dev = intel_hdmi_to_dev(hdmi);
+	struct drm_i915_private *dev_priv = dev->dev_private;
 
 	if (IS_G4X(dev))
 		return 165000;
-	else if (IS_HASWELL(dev) || INTEL_INFO(dev)->gen >= 8)
+	else if (IS_HASWELL(dev) || dev_priv->info->gen >= 8)
 		return 300000;
 	else
 		return 225000;

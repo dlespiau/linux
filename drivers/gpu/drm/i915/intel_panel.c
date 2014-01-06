@@ -254,6 +254,7 @@ void intel_gmch_panel_fitting(struct intel_crtc *intel_crtc,
 			      int fitting_mode)
 {
 	struct drm_device *dev = intel_crtc->base.dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	u32 pfit_control = 0, pfit_pgm_ratios = 0, border = 0;
 	struct drm_display_mode *adjusted_mode;
 
@@ -276,7 +277,7 @@ void intel_gmch_panel_fitting(struct intel_crtc *intel_crtc,
 		break;
 	case DRM_MODE_SCALE_ASPECT:
 		/* Scale but preserve the aspect ratio */
-		if (INTEL_INFO(dev)->gen >= 4)
+		if (dev_priv->info->gen >= 4)
 			i965_scale_aspect(pipe_config, &pfit_control);
 		else
 			i9xx_scale_aspect(pipe_config, &pfit_control,
@@ -290,7 +291,7 @@ void intel_gmch_panel_fitting(struct intel_crtc *intel_crtc,
 		if (pipe_config->pipe_src_h != adjusted_mode->vdisplay ||
 		    pipe_config->pipe_src_w != adjusted_mode->hdisplay) {
 			pfit_control |= PFIT_ENABLE;
-			if (INTEL_INFO(dev)->gen >= 4)
+			if (dev_priv->info->gen >= 4)
 				pfit_control |= PFIT_SCALING_AUTO;
 			else
 				pfit_control |= (VERT_AUTO_SCALE |
@@ -306,7 +307,7 @@ void intel_gmch_panel_fitting(struct intel_crtc *intel_crtc,
 
 	/* 965+ wants fuzzy fitting */
 	/* FIXME: handle multiple panels by failing gracefully */
-	if (INTEL_INFO(dev)->gen >= 4)
+	if (dev_priv->info->gen >= 4)
 		pfit_control |= ((intel_crtc->pipe << PFIT_PIPE_SHIFT) |
 				 PFIT_FILTER_FUZZY);
 
@@ -317,7 +318,7 @@ out:
 	}
 
 	/* Make sure pre-965 set dither correctly for 18bpp panels. */
-	if (INTEL_INFO(dev)->gen < 4 && pipe_config->pipe_bpp == 18)
+	if (dev_priv->info->gen < 4 && pipe_config->pipe_bpp == 18)
 		pfit_control |= PANEL_8TO6_DITHER_ENABLE;
 
 	pipe_config->gmch_pfit.control = pfit_control;
@@ -376,7 +377,7 @@ static u32 i9xx_get_backlight(struct intel_connector *connector)
 	u32 val;
 
 	val = I915_READ(BLC_PWM_CTL) & BACKLIGHT_DUTY_CYCLE_MASK;
-	if (INTEL_INFO(dev)->gen < 4)
+	if (dev_priv->info->gen < 4)
 		val >>= 1;
 
 	if (panel->backlight.combination_mode) {

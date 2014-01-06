@@ -411,7 +411,7 @@ void intel_detect_pch(struct drm_device *dev)
 	/* In all current cases, num_pipes is equivalent to the PCH_NOP setting
 	 * (which really amounts to a PCH but no South Display).
 	 */
-	if (INTEL_INFO(dev)->num_pipes == 0) {
+	if (dev_priv->info->num_pipes == 0) {
 		dev_priv->pch_type = PCH_NOP;
 		return;
 	}
@@ -480,7 +480,9 @@ check_next:
 
 bool i915_semaphore_is_enabled(struct drm_device *dev)
 {
-	if (INTEL_INFO(dev)->gen < 6)
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
+	if (dev_priv->info->gen < 6)
 		return false;
 
 	/* Until we get further testing... */
@@ -494,7 +496,7 @@ bool i915_semaphore_is_enabled(struct drm_device *dev)
 
 #ifdef CONFIG_INTEL_IOMMU
 	/* Enable semaphores on SNB when IO remapping is off */
-	if (INTEL_INFO(dev)->gen == 6 && intel_iommu_gfx_mapped)
+	if (dev_priv->info->gen == 6 && intel_iommu_gfx_mapped)
 		return false;
 #endif
 

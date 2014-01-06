@@ -1073,20 +1073,21 @@ static uint32_t vlv_plane_formats[] = {
 int
 intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_plane *intel_plane;
 	unsigned long possible_crtcs;
 	const uint32_t *plane_formats;
 	int num_plane_formats;
 	int ret;
 
-	if (INTEL_INFO(dev)->gen < 5)
+	if (dev_priv->info->gen < 5)
 		return -ENODEV;
 
 	intel_plane = kzalloc(sizeof(*intel_plane), GFP_KERNEL);
 	if (!intel_plane)
 		return -ENOMEM;
 
-	switch (INTEL_INFO(dev)->gen) {
+	switch (dev_priv->info->gen) {
 	case 5:
 	case 6:
 		intel_plane->can_scale = true;

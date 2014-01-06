@@ -307,7 +307,7 @@ static void intel_uncore_forcewake_reset(struct drm_device *dev)
 
 	if (IS_VALLEYVIEW(dev)) {
 		vlv_force_wake_reset(dev_priv);
-	} else if (INTEL_INFO(dev)->gen >= 6) {
+	} else if (dev_priv->info->gen >= 6) {
 		__gen6_gt_force_wake_reset(dev_priv);
 		if (IS_IVYBRIDGE(dev) || IS_HASWELL(dev))
 			__gen6_gt_force_wake_mt_reset(dev_priv);
@@ -728,7 +728,7 @@ void intel_uncore_init(struct drm_device *dev)
 			__gen6_gt_force_wake_put;
 	}
 
-	switch (INTEL_INFO(dev)->gen) {
+	switch (dev_priv->info->gen) {
 	default:
 		dev_priv->uncore.funcs.mmio_writeb  = gen8_write8;
 		dev_priv->uncore.funcs.mmio_writew  = gen8_write16;
@@ -818,7 +818,7 @@ int i915_reg_read_ioctl(struct drm_device *dev,
 
 	for (i = 0; i < ARRAY_SIZE(whitelist); i++, entry++) {
 		if (entry->offset == reg->offset &&
-		    (1 << INTEL_INFO(dev)->gen & entry->gen_bitmask))
+		    (1 << dev_priv->info->gen & entry->gen_bitmask))
 			break;
 	}
 
@@ -981,7 +981,9 @@ static int gen6_do_reset(struct drm_device *dev)
 
 int intel_gpu_reset(struct drm_device *dev)
 {
-	switch (INTEL_INFO(dev)->gen) {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
+	switch (dev_priv->info->gen) {
 	case 8:
 	case 7:
 	case 6: return gen6_do_reset(dev);

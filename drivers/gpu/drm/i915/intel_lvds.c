@@ -112,7 +112,7 @@ static void intel_lvds_get_config(struct intel_encoder *encoder,
 	pipe_config->adjusted_mode.flags |= flags;
 
 	/* gen2/3 store dither state in pfit control, needs to match */
-	if (INTEL_INFO(dev)->gen < 4) {
+	if (dev_priv->info->gen < 4) {
 		tmp = I915_READ(PFIT_CONTROL);
 
 		pipe_config->gmch_pfit.control |= tmp & PANEL_8TO6_DITHER_ENABLE;
@@ -182,7 +182,7 @@ static void intel_pre_enable_lvds(struct intel_encoder *encoder)
 	/* Set the dithering flag on LVDS as needed, note that there is no
 	 * special lvds dither control bit on pch-split platforms, dithering is
 	 * only controlled through the PIPECONF reg. */
-	if (INTEL_INFO(dev)->gen == 4) {
+	if (dev_priv->info->gen == 4) {
 		/* Bspec wording suggests that LVDS port dithering only exists
 		 * for 18bpp panels. */
 		if (crtc->config.dither && crtc->config.pipe_bpp == 18)
@@ -285,7 +285,7 @@ static bool intel_lvds_compute_config(struct intel_encoder *intel_encoder,
 	unsigned int lvds_bpp;
 
 	/* Should never happen!! */
-	if (INTEL_INFO(dev)->gen < 4 && intel_crtc->pipe == 0) {
+	if (dev_priv->info->gen < 4 && intel_crtc->pipe == 0) {
 		DRM_ERROR("Can't support LVDS on pipe A\n");
 		return false;
 	}
@@ -868,6 +868,8 @@ static bool compute_is_dual_link_lvds(struct intel_lvds_encoder *lvds_encoder)
 
 static bool intel_lvds_supported(struct drm_device *dev)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
+
 	/* With the introduction of the PCH we gained a dedicated
 	 * LVDS presence pin, use it. */
 	if (HAS_PCH_IBX(dev) || HAS_PCH_CPT(dev))
@@ -875,7 +877,7 @@ static bool intel_lvds_supported(struct drm_device *dev)
 
 	/* Otherwise LVDS was only attached to mobile products,
 	 * except for the inglorious 830gm */
-	if (INTEL_INFO(dev)->gen <= 4 && IS_MOBILE(dev) && !IS_I830(dev))
+	if (dev_priv->info->gen <= 4 && IS_MOBILE(dev) && !IS_I830(dev))
 		return true;
 
 	return false;

@@ -558,10 +558,11 @@ static struct bin_attribute error_state_attr = {
 
 void i915_setup_sysfs(struct drm_device *dev)
 {
+	struct drm_i915_private *dev_priv = dev->dev_private;
 	int ret;
 
 #ifdef CONFIG_PM
-	if (INTEL_INFO(dev)->gen >= 6) {
+	if (dev_priv->info->gen >= 6) {
 		ret = sysfs_merge_group(&dev->primary->kdev->kobj,
 					&rc6_attr_group);
 		if (ret)
@@ -584,7 +585,7 @@ void i915_setup_sysfs(struct drm_device *dev)
 	ret = 0;
 	if (IS_VALLEYVIEW(dev))
 		ret = sysfs_create_files(&dev->primary->kdev->kobj, vlv_attrs);
-	else if (INTEL_INFO(dev)->gen >= 6)
+	else if (dev_priv->info->gen >= 6)
 		ret = sysfs_create_files(&dev->primary->kdev->kobj, gen6_attrs);
 	if (ret)
 		DRM_ERROR("RPS sysfs setup failed\n");

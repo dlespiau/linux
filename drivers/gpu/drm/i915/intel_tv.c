@@ -1083,7 +1083,7 @@ static void intel_tv_mode_set(struct intel_encoder *encoder)
 			   color_conversion->av);
 	}
 
-	if (INTEL_INFO(dev)->gen >= 4)
+	if (dev_priv->info->gen >= 4)
 		I915_WRITE(TV_CLR_KNOBS, 0x00404000);
 	else
 		I915_WRITE(TV_CLR_KNOBS, 0x00606000);
