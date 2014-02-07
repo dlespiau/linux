@@ -1497,7 +1497,8 @@ static void intel_device_info_runtime_init(struct drm_device *dev)
 		 * On CPT/PPT, we can detect this case as SFUSE_STRAP_FUSE_LOCK
 		 * should be set when taking over after the firmware.
 		 */
-		if (fuse_strap & ILK_INTERNAL_DISPLAY_DISABLE ||
+		if (i915.disable_display ||
+		    fuse_strap & ILK_INTERNAL_DISPLAY_DISABLE ||
 		    sfuse_strap & SFUSE_STRAP_DISPLAY_DISABLED ||
 		    (dev_priv->pch_type == PCH_CPT &&
 		     !(sfuse_strap & SFUSE_STRAP_FUSE_LOCK))) {

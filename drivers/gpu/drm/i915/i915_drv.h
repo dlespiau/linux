@@ -1957,6 +1957,7 @@ struct i915_params {
 	bool fastboot;
 	bool prefault_disable;
 	bool reset;
+	bool disable_display;
 };
 extern struct i915_params i915 __read_mostly;
 
