@@ -1,0 +1,14 @@
+origin/drm-intel-next-queued f7d2323c181ed5a2596494b860a99d567fd3e6cd
+	drm/i915: correct BLC vs PWM enable/disable ordering
+origin/drm-intel-fixes ad952a8f0cb9f0a5f1c8dd0521ffeb01a8c451b9
+	drm/i915: Don't clobber the GTT when it's within stolen memory
+drm-upstream/drm-next bc1dfff04a5d4064ba0db1fab13f84ab4f333d2b
+	Merge branch 'drm-nouveau-next' of git://anongit.freedesktop.org/git/nouveau/linux-2.6 into drm-next
+drm-upstream/drm-fixes dfd7aecfd6d227831d77719379d4c7137f444fee
+	Merge tag 'drm-intel-fixes-2014-07-03' of git://anongit.freedesktop.org/drm-intel
+origin/topic/core-stuff 2a8c6edfd2a888085ae0ddaf6c3ea3f529fdc4e8
+	drm/fb-helper: Remove unnecessary list empty check in drm_fb_helper_debug_enter()
+sound-upstream/for-next 549d87823564e6edbd2077c2e6c979d17841f691
+	ALSA: hda - Add several entries for enabling HP mute led
+origin/topic/soix 8abdc17941c71b37311bb93876ac83dce58160c8
+	drm/i915: make sure PC8 is enabled on suspend and disabled on resume v4
