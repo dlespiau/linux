@@ -1217,6 +1217,29 @@ out_unlock:
 	return ret;
 }
 
+static int intel_plane_set_property(struct drm_plane *plane,
+				    struct drm_property *prop,
+				    uint64_t val)
+{
+	struct intel_plane *intel_plane = to_intel_plane(plane);
+	uint64_t old_val;
+	int ret = -ENOENT;
+
+	if (prop == plane->rotation_property) {
+		/* exactly one rotation angle please */
+		if (hweight32(val & 0xf) != 1)
+			return -EINVAL;
+
+		old_val = intel_plane->rotation;
+		intel_plane->rotation = val;
+		ret = intel_plane_restore(plane);
+		if (ret)
+			intel_plane->rotation = old_val;
+	}
+
+	return ret;
+}
+
 int intel_plane_restore(struct drm_plane *plane)
 {
 	struct intel_plane *intel_plane = to_intel_plane(plane);
@@ -1243,6 +1266,7 @@ static const struct drm_plane_funcs intel_plane_funcs = {
 	.update_plane = intel_update_plane,
 	.disable_plane = intel_disable_plane,
 	.destroy = intel_destroy_plane,
+	.set_property = intel_plane_set_property,
 };
 
 static uint32_t ilk_plane_formats[] = {
@@ -1353,8 +1377,22 @@ intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 			     &intel_plane_funcs,
 			     plane_formats, num_plane_formats,
 			     false);
-	if (ret)
+	if (ret) {
 		kfree(intel_plane);
+		goto out;
+	}
 
+	if (!intel_plane->base.rotation_property)
+		intel_plane->base.rotation_property =
+			drm_mode_create_rotation_property(dev,
+							  BIT(DRM_ROTATE_0) |
+							  BIT(DRM_ROTATE_180));
+
+	if (intel_plane->base.rotation_property)
+		drm_object_attach_property(&intel_plane->base.base,
+					   intel_plane->base.rotation_property,
+					   intel_plane->rotation);
+
+ out:
 	return ret;
 }

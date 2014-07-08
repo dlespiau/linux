@@ -618,6 +618,7 @@ struct drm_plane {
 
 	const struct drm_plane_funcs *funcs;
 
+	struct drm_property *rotation_property;
 	struct drm_object_properties properties;
 
 	enum drm_plane_type type;
