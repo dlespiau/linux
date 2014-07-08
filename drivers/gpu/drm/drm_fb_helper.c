@@ -279,9 +279,23 @@ static bool restore_fbdev_mode(struct drm_fb_helper *fb_helper)
 
 	drm_warn_on_modeset_not_all_locked(dev);
 
-	list_for_each_entry(plane, &dev->mode_config.plane_list, head)
+	list_for_each_entry(plane, &dev->mode_config.plane_list, head) {
+
+		if (plane->rotation_property) {
+			int ret = 0;
+			if (plane->funcs->set_property)
+				ret = plane->funcs->set_property(plane,
+					plane->rotation_property,
+					BIT(DRM_ROTATE_0));
+			if (!ret)
+				drm_object_property_set_value(&plane->base,
+					plane->rotation_property,
+					BIT(DRM_ROTATE_0));
+		}
+
 		if (plane->type != DRM_PLANE_TYPE_PRIMARY)
 			drm_plane_force_disable(plane);
+	}
 
 	for (i = 0; i < fb_helper->crtc_count; i++) {
 		struct drm_mode_set *mode_set = &fb_helper->crtc_info[i].mode_set;
