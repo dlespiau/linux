@@ -2403,7 +2403,9 @@ static void i9xx_update_primary_plane(struct drm_crtc *crtc,
 	unsigned long linear_offset;
 	u32 dspcntr;
 	u32 reg;
+	int pixel_size;
 
+	pixel_size = drm_format_plane_cpp(fb->pixel_format, 0);
 	intel_fb = to_intel_framebuffer(fb);
 	obj = intel_fb->obj;
 
@@ -2411,6 +2413,8 @@ static void i9xx_update_primary_plane(struct drm_crtc *crtc,
 	dspcntr = I915_READ(reg);
 	/* Mask out pixel format bits in case we change it */
 	dspcntr &= ~DISPPLANE_PIXFORMAT_MASK;
+	dspcntr &= ~DISPPLANE_ROTATE_180;
+
 	switch (fb->pixel_format) {
 	case DRM_FORMAT_C8:
 		dspcntr |= DISPPLANE_8BPP;
@@ -2452,8 +2456,6 @@ static void i9xx_update_primary_plane(struct drm_crtc *crtc,
 	if (IS_G4X(dev))
 		dspcntr |= DISPPLANE_TRICKLE_FEED_DISABLE;
 
-	I915_WRITE(reg, dspcntr);
-
 	linear_offset = y * fb->pitches[0] + x * (fb->bits_per_pixel / 8);
 
 	if (INTEL_INFO(dev)->gen >= 4) {
@@ -2466,6 +2468,18 @@ static void i9xx_update_primary_plane(struct drm_crtc *crtc,
 		intel_crtc->dspaddr_offset = linear_offset;
 	}
 
+	if (to_intel_plane(crtc->primary)->rotation == BIT(DRM_ROTATE_180)) {
+		dspcntr |= DISPPLANE_ROTATE_180;
+
+		x += (intel_crtc->config.pipe_src_w - 1);
+		y += (intel_crtc->config.pipe_src_h - 1);
+		linear_offset += (intel_crtc->config.pipe_src_h - 1) *
+			fb->pitches[0] +
+			(intel_crtc->config.pipe_src_w - 1) * pixel_size;
+	}
+
+	I915_WRITE(reg, dspcntr);
+
 	DRM_DEBUG_KMS("Writing base %08lX %08lX %d %d %d\n",
 		      i915_gem_obj_ggtt_offset(obj), linear_offset, x, y,
 		      fb->pitches[0]);
@@ -2476,7 +2490,8 @@ static void i9xx_update_primary_plane(struct drm_crtc *crtc,
 		I915_WRITE(DSPTILEOFF(plane), (y << 16) | x);
 		I915_WRITE(DSPLINOFF(plane), linear_offset);
 	} else
-		I915_WRITE(DSPADDR(plane), i915_gem_obj_ggtt_offset(obj) + linear_offset);
+		I915_WRITE(DSPADDR(plane), i915_gem_obj_ggtt_offset(obj) +
+				linear_offset);
 	POSTING_READ(reg);
 }
 
@@ -2493,7 +2508,9 @@ static void ironlake_update_primary_plane(struct drm_crtc *crtc,
 	unsigned long linear_offset;
 	u32 dspcntr;
 	u32 reg;
+	int pixel_size;
 
+	pixel_size = drm_format_plane_cpp(fb->pixel_format, 0);
 	intel_fb = to_intel_framebuffer(fb);
 	obj = intel_fb->obj;
 
@@ -2501,6 +2518,8 @@ static void ironlake_update_primary_plane(struct drm_crtc *crtc,
 	dspcntr = I915_READ(reg);
 	/* Mask out pixel format bits in case we change it */
 	dspcntr &= ~DISPPLANE_PIXFORMAT_MASK;
+	dspcntr &= ~DISPPLANE_ROTATE_180;
+
 	switch (fb->pixel_format) {
 	case DRM_FORMAT_C8:
 		dspcntr |= DISPPLANE_8BPP;
@@ -2538,14 +2557,27 @@ static void ironlake_update_primary_plane(struct drm_crtc *crtc,
 	else
 		dspcntr |= DISPPLANE_TRICKLE_FEED_DISABLE;
 
-	I915_WRITE(reg, dspcntr);
-
 	linear_offset = y * fb->pitches[0] + x * (fb->bits_per_pixel / 8);
 	intel_crtc->dspaddr_offset =
 		intel_gen4_compute_page_offset(&x, &y, obj->tiling_mode,
 					       fb->bits_per_pixel / 8,
 					       fb->pitches[0]);
 	linear_offset -= intel_crtc->dspaddr_offset;
+
+	if (to_intel_plane(crtc->primary)->rotation == BIT(DRM_ROTATE_180)) {
+		dspcntr |= DISPPLANE_ROTATE_180;
+
+		if (!IS_HASWELL(dev) && !IS_BROADWELL(dev)) {
+			x += (intel_crtc->config.pipe_src_w - 1);
+			y += (intel_crtc->config.pipe_src_h - 1);
+			linear_offset +=
+			(intel_crtc->config.pipe_src_h - 1) *
+			fb->pitches[0] + (intel_crtc->config.pipe_src_w - 1) *
+			pixel_size;
+		}
+	}
+
+	I915_WRITE(reg, dspcntr);
 
 	DRM_DEBUG_KMS("Writing base %08lX %08lX %d %d %d\n",
 		      i915_gem_obj_ggtt_offset(obj), linear_offset, x, y,
@@ -11516,10 +11548,64 @@ static void intel_plane_destroy(struct drm_plane *plane)
 	kfree(intel_plane);
 }
 
+static int intel_primary_plane_set_property(struct drm_plane *plane,
+				    struct drm_property *prop,
+				    uint64_t val)
+{
+	struct drm_device *dev = plane->dev;
+	struct drm_i915_private *dev_priv = dev->dev_private;
+	struct intel_plane *intel_plane = to_intel_plane(plane);
+	struct drm_crtc *crtc = plane->crtc;
+	struct intel_crtc *intel_crtc;
+	uint64_t old_val;
+
+	if (prop == plane->rotation_property) {
+		/* exactly one rotation angle please */
+		if (hweight32(val & 0xf) != 1)
+			return -EINVAL;
+
+		old_val = intel_plane->rotation;
+		intel_plane->rotation = val;
+
+		if (old_val == intel_plane->rotation)
+			return 0;
+
+		intel_crtc = to_intel_crtc(plane->crtc);
+
+		if (intel_crtc && intel_crtc->active && intel_crtc->primary_enabled) {
+			intel_crtc_wait_for_pending_flips(crtc);
+
+		/* FBC does not work on some platforms for rotated planes */
+			if (INTEL_INFO(dev)->gen <= 4 && !IS_G4X(dev)) {
+				if (dev_priv->fbc.plane == intel_crtc->plane &&
+					intel_plane->rotation != BIT(DRM_ROTATE_0))
+					intel_disable_fbc(dev);
+				/* If rotation was set earlier and new rotation is 0, we might
+				 * have disabled fbc earlier. So update it now */
+				else if (intel_plane->rotation == BIT(DRM_ROTATE_0) &&
+					old_val != BIT(DRM_ROTATE_0)) {
+					mutex_lock(&dev->struct_mutex);
+					intel_update_fbc(dev);
+					mutex_unlock(&dev->struct_mutex);
+				}
+			}
+
+			dev_priv->display.update_primary_plane(crtc,
+				crtc->primary->fb, 0, 0);
+
+		} else {
+			DRM_DEBUG_KMS("[CRTC:%d] is not active. Only rotation"
+				"property is updated\n", crtc->base.id);
+		}
+	}
+	return 0;
+}
+
 static const struct drm_plane_funcs intel_primary_plane_funcs = {
 	.update_plane = intel_primary_plane_setplane,
 	.disable_plane = intel_primary_plane_disable,
 	.destroy = intel_plane_destroy,
+	.set_property = intel_primary_plane_set_property
 };
 
 static struct drm_plane *intel_primary_plane_create(struct drm_device *dev,
@@ -11537,6 +11623,7 @@ static struct drm_plane *intel_primary_plane_create(struct drm_device *dev,
 	primary->max_downscale = 1;
 	primary->pipe = pipe;
 	primary->plane = pipe;
+	primary->rotation = BIT(DRM_ROTATE_0);
 	if (HAS_FBC(dev) && INTEL_INFO(dev)->gen < 4)
 		primary->plane = !pipe;
 
@@ -11552,6 +11639,18 @@ static struct drm_plane *intel_primary_plane_create(struct drm_device *dev,
 				 &intel_primary_plane_funcs,
 				 intel_primary_formats, num_formats,
 				 DRM_PLANE_TYPE_PRIMARY);
+	if (INTEL_INFO(dev)->gen >= 4) {
+		if (!primary->base.rotation_property)
+			primary->base.rotation_property =
+				drm_mode_create_rotation_property(dev,
+							BIT(DRM_ROTATE_0) |
+							BIT(DRM_ROTATE_180));
+		if (primary->base.rotation_property)
+			drm_object_attach_property(&primary->base.base,
+						primary->base.rotation_property,
+						primary->rotation);
+	}
+
 	return &primary->base;
 }
 
