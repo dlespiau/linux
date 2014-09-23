@@ -1,0 +1,12 @@
+origin/drm-intel-next-queued 9adccc6063d1cf6ba38a5a26b87001554105be18
+	drm/i915: add SW tracking to FBC enabling
+origin/drm-intel-fixes 0f33be009b89d2268e94194dc4fd01a7851b6d51
+	Linux 3.17-rc6
+drm-upstream/drm-next 94318d50ffc84a1ebaf1a83a0a56bbbaf415bacf
+	drm/ttm: Clean usage of ttm_io_prot() with TTM_PL_FLAG_CACHED
+drm-upstream/drm-fixes fe3d9c4b87bb98222a502cc585844a0b950786fb
+	drm/nouveau: ltc/gf100-: fix cbc issues on certain boards
+origin/topic/core-stuff 72d31999a3ebcfa4d0590fd5e4e34b13ef6f92ed
+	drm/udl: use container_of to resolve udl_fbdev from drm_fb_helper
+sound-upstream/for-next a5062dee82826f54529c89d0e58211897b1b4c68
+	ALSA: hda - add explicit include of err.h
