@@ -2149,7 +2149,7 @@ static void intel_enable_primary_hw_plane(struct drm_plane *plane,
 	 * is disabled, even if the plane enable is already
 	 * armed to occur at the next vblank :(
 	 */
-	if (IS_BROADWELL(dev))
+	if (IS_BROADWELL(dev) || INTEL_INFO(dev)->gen >= 9)
 		intel_wait_for_vblank(dev, intel_crtc->pipe);
 }
 
