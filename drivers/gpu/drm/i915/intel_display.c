@@ -9495,6 +9495,9 @@ static void ilk_do_mmio_flip(struct intel_crtc *intel_crtc)
 	u32 dspcntr;
 	u32 reg;
 
+	DRM_DEBUG_KMS("XXX MMIO flip on pipe %c (%c)\n",
+		      pipe_name(intel_crtc->pipe),
+		      pipe_name(intel_crtc->plane));
 	reg = DSPCNTR(intel_crtc->plane);
 	dspcntr = I915_READ(reg);
 

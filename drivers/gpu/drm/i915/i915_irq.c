@@ -1775,6 +1775,8 @@ static void gen6_rps_irq_handler(struct drm_i915_private *dev_priv, u32 pm_iir)
 
 static bool intel_pipe_handle_vblank(struct drm_device *dev, enum pipe pipe)
 {
+	DRM_DEBUG_KMS("XXX: intel handle vblank\n");
+
 	if (!drm_handle_vblank(dev, pipe))
 		return false;
 
@@ -2286,6 +2288,8 @@ static irqreturn_t gen8_irq_handler(int irq, void *arg)
 	if (!master_ctl)
 		return IRQ_NONE;
 
+	DRM_DEBUG_KMS("XXX: master ctl 0x%08x\n", master_ctl);
+
 	I915_WRITE(GEN8_MASTER_IRQ, 0);
 	POSTING_READ(GEN8_MASTER_IRQ);
 
@@ -2330,6 +2334,7 @@ static irqreturn_t gen8_irq_handler(int irq, void *arg)
 
 		pipe_iir = I915_READ(GEN8_DE_PIPE_IIR(pipe));
 		if (pipe_iir) {
+			DRM_DEBUG_KMS("XXX: pipe_iir 0x%08x\n", pipe_iir);
 			ret = IRQ_HANDLED;
 			I915_WRITE(GEN8_DE_PIPE_IIR(pipe), pipe_iir);
 
