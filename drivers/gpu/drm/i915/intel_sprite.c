@@ -308,7 +308,7 @@ skl_update_colorkey(struct drm_plane *drm_plane,
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_plane *intel_plane = to_intel_plane(drm_plane);
 	const int pipe = intel_plane->pipe;
-	const int plane = intel_plane->plane;
+	const int plane = intel_plane->plane + 1;
 	u32 plane_ctl;
 
 	I915_WRITE(PLANE_KEYVAL(pipe, plane), key->min_value);
@@ -336,7 +336,7 @@ skl_get_colorkey(struct drm_plane *drm_plane,
 	struct drm_i915_private *dev_priv = dev->dev_private;
 	struct intel_plane *intel_plane = to_intel_plane(drm_plane);
 	const int pipe = intel_plane->pipe;
-	const int plane = intel_plane->plane;
+	const int plane = intel_plane->plane + 1;
 	u32 plane_ctl;
 
 	key->min_value = I915_READ(PLANE_KEYVAL(pipe, plane));
