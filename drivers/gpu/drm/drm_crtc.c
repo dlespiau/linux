@@ -1462,6 +1462,11 @@ static int drm_mode_create_standard_properties(struct drm_device *dev)
 		return -ENOMEM;
 	dev->mode_config.prop_mode_id = prop;
 
+	prop = drm_property_create_range(dev, 0, "blend_func", 0, U32_MAX);
+	if (!prop)
+		return -ENOMEM;
+	dev->mode_config.prop_blend_func = prop;
+
 	return 0;
 }
 
