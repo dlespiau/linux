@@ -9139,13 +9139,14 @@ static void intel_unpin_work_fn(struct work_struct *__work)
 	mutex_lock(&dev->struct_mutex);
 	intel_unpin_fb_obj(intel_fb_obj(work->old_fb));
 	drm_gem_object_unreference(&work->pending_flip_obj->base);
-	drm_framebuffer_unreference(work->old_fb);
 
 	intel_fbc_update(dev);
 
 	if (work->flip_queued_req)
 		i915_gem_request_assign(&work->flip_queued_req, NULL);
 	mutex_unlock(&dev->struct_mutex);
+
+	drm_framebuffer_unreference(work->old_fb);
 
 	intel_frontbuffer_flip_complete(dev, INTEL_FRONTBUFFER_PRIMARY(pipe));
 
