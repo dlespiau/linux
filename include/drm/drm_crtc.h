@@ -1209,6 +1209,8 @@ extern int drm_crtc_init_with_planes(struct drm_device *dev,
 				     const struct drm_crtc_funcs *funcs);
 extern void drm_crtc_cleanup(struct drm_crtc *crtc);
 extern unsigned int drm_crtc_index(struct drm_crtc *crtc);
+extern void drm_crtc_attach_cursor_plane(struct drm_crtc *crtc,
+				  struct drm_plane *cursor);
 
 /**
  * drm_crtc_mask - find the mask of a registered CRTC

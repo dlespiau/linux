@@ -663,7 +663,6 @@ int drm_crtc_init_with_planes(struct drm_device *dev, struct drm_crtc *crtc,
 	int ret;
 
 	WARN_ON(primary && primary->type != DRM_PLANE_TYPE_PRIMARY);
-	WARN_ON(cursor && cursor->type != DRM_PLANE_TYPE_CURSOR);
 
 	crtc->dev = dev;
 	crtc->funcs = funcs;
@@ -680,11 +679,10 @@ int drm_crtc_init_with_planes(struct drm_device *dev, struct drm_crtc *crtc,
 	config->num_crtc++;
 
 	crtc->primary = primary;
-	crtc->cursor = cursor;
 	if (primary)
 		primary->possible_crtcs = 1 << drm_crtc_index(crtc);
-	if (cursor)
-		cursor->possible_crtcs = 1 << drm_crtc_index(crtc);
+
+	drm_crtc_attach_cursor_plane(crtc, cursor);
 
 	if (drm_core_check_feature(dev, DRIVER_ATOMIC)) {
 		drm_object_attach_property(&crtc->base, config->prop_active, 0);
@@ -745,6 +743,28 @@ unsigned int drm_crtc_index(struct drm_crtc *crtc)
 	BUG();
 }
 EXPORT_SYMBOL(drm_crtc_index);
+
+/**
+ * drm_crtc_attach_cursor_plane - Attach a cursor plane to a CRTC
+ * @crtc: CRTC object
+ * @cursor: Cursor plane for CRTC
+ *
+ * It's sometimes useful to be able to attach a cursor plane after
+ * drm_crtc_init_with_planes() has been called.
+ */
+void drm_crtc_attach_cursor_plane(struct drm_crtc *crtc,
+				  struct drm_plane *cursor)
+{
+	if (!cursor)
+		return;
+
+	WARN_ON(cursor->type != DRM_PLANE_TYPE_CURSOR);
+	WARN_ON(crtc->cursor);
+
+	crtc->cursor = cursor;
+	cursor->possible_crtcs = 1 << drm_crtc_index(crtc);
+}
+EXPORT_SYMBOL(drm_crtc_attach_cursor_plane);
 
 /*
  * drm_mode_remove - remove and free a mode
