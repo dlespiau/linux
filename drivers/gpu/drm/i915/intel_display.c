@@ -13570,9 +13570,16 @@ static void intel_crtc_init(struct drm_device *dev, int pipe)
 	if (!primary)
 		goto fail;
 
-	cursor = intel_cursor_plane_create(dev, pipe);
-	if (!cursor)
-		goto fail;
+	/*
+	 * gen9 display is a bit special and the last plane is effectively the
+	 * same as the cursor plane. We prefer exposing a full sprite plane,
+	 * but with the type CURSOR (see intel_plane_init()).
+	 */
+	if (INTEL_INFO(dev)->gen != 9) {
+		cursor = intel_cursor_plane_create(dev, pipe);
+		if (!cursor)
+			goto fail;
+	}
 
 	ret = drm_crtc_init_with_planes(dev, &intel_crtc->base, primary,
 					cursor, &intel_crtc_funcs);

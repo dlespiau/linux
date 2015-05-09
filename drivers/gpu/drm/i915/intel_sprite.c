@@ -1086,11 +1086,14 @@ static const uint32_t vlv_plane_formats[] = {
 int
 intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 {
+	struct drm_i915_private *dev_priv = to_i915(dev);
+	struct drm_crtc *crtc = dev_priv->pipe_to_crtc_mapping[pipe];
 	struct intel_plane *intel_plane;
 	struct intel_plane_state *state;
 	unsigned long possible_crtcs;
 	const uint32_t *plane_formats;
 	int num_plane_formats;
+	enum drm_plane_type plane_type = DRM_PLANE_TYPE_OVERLAY;
 	int ret;
 
 	if (INTEL_INFO(dev)->gen < 5)
@@ -1168,11 +1171,27 @@ intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 	intel_plane->check_plane = intel_check_sprite_plane;
 	intel_plane->commit_plane = intel_commit_sprite_plane;
 	intel_plane->ckey.flags = I915_SET_COLORKEY_NONE;
+
 	possible_crtcs = (1 << pipe);
+
+	/*
+	 * on gen9 display we register the last sprite plane as cursor plane.
+	 * This is because there's only one hw plane backing up the topmost
+	 * plane and the legacy cursor, and we only want to expose a single
+	 * universal plane.
+	 */
+	if (INTEL_INFO(dev)->gen == 9 &&
+	    plane == (INTEL_INFO(dev)->num_sprites[pipe] - 1))
+		plane_type = DRM_PLANE_TYPE_CURSOR;
+
 	ret = drm_universal_plane_init(dev, &intel_plane->base, possible_crtcs,
 				       &intel_plane_funcs,
 				       plane_formats, num_plane_formats,
-				       DRM_PLANE_TYPE_OVERLAY);
+				       plane_type);
+
+	if (plane_type == DRM_PLANE_TYPE_CURSOR)
+		drm_crtc_attach_cursor_plane(crtc, &intel_plane->base);
+
 	if (ret) {
 		kfree(intel_plane);
 		goto out;
