@@ -2909,7 +2909,7 @@ static void skl_compute_wm_pipe_parameters(struct drm_crtc *crtc,
 
 		fb = crtc->cursor->state->fb;
 		p->cursor.y_bytes_per_pixel = 0;
-		if (fb) {
+		if (!IS_GEN9(dev) && fb) {
 			p->cursor.enabled = true;
 			p->cursor.bytes_per_pixel = fb->bits_per_pixel / 8;
 			p->cursor.horiz_pixels = crtc->cursor->state->crtc_w;
@@ -2926,7 +2926,8 @@ static void skl_compute_wm_pipe_parameters(struct drm_crtc *crtc,
 		struct intel_plane *intel_plane = to_intel_plane(plane);
 
 		if (intel_plane->pipe == pipe &&
-			plane->type == DRM_PLANE_TYPE_OVERLAY)
+			(plane->type == DRM_PLANE_TYPE_OVERLAY ||
+			(IS_GEN9(dev) && plane->type == DRM_PLANE_TYPE_CURSOR)))
 			p->plane[i++] = intel_plane->wm;
 	}
 }
