@@ -1143,6 +1143,8 @@ int skl_max_scale(struct intel_crtc *crtc, struct intel_crtc_state *crtc_state);
 
 unsigned long intel_plane_obj_offset(struct intel_plane *intel_plane,
 				     struct drm_i915_gem_object *obj);
+void skl_plane_get_formats(int pipe, int plane,
+			   const uint32_t **formats, int *n_formats);
 u32 skl_plane_ctl_format(uint32_t pixel_format);
 u32 skl_plane_ctl_tiling(uint64_t fb_modifier);
 u32 skl_plane_ctl_rotation(unsigned int rotation);

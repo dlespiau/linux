@@ -74,13 +74,19 @@ static const uint32_t gen4_primary_formats[] = {
 	DRM_FORMAT_VYUY,
 };
 
-
-static const uint32_t skl_primary_formats[] = {
-	COMMON_PRIMARY_FORMATS, \
-	DRM_FORMAT_XBGR8888,
+static uint32_t skl_plane_formats[] = {
+	DRM_FORMAT_C8,
+	DRM_FORMAT_RGB565,
 	DRM_FORMAT_ABGR8888,
-	DRM_FORMAT_XRGB2101010,
+	DRM_FORMAT_ARGB8888,
+	DRM_FORMAT_XBGR8888,
+	DRM_FORMAT_XRGB8888,
 	DRM_FORMAT_XBGR2101010,
+	DRM_FORMAT_XRGB2101010,
+	DRM_FORMAT_YUYV,
+	DRM_FORMAT_YVYU,
+	DRM_FORMAT_UYVY,
+	DRM_FORMAT_VYUY,
 };
 
 /* Cursor formats */
@@ -2501,6 +2507,13 @@ static int i9xx_format_to_fourcc(int format)
 	case DISPPLANE_RGBX101010:
 		return DRM_FORMAT_XBGR2101010;
 	}
+}
+
+void skl_plane_get_formats(int pipe, int plane,
+			   const uint32_t **formats, int *n_formats)
+{
+	*formats = skl_plane_formats;
+	*n_formats = ARRAY_SIZE(skl_plane_formats);
 }
 
 static int skl_format_to_fourcc(int format, bool rgb_order, bool alpha)
@@ -13301,8 +13314,8 @@ static struct drm_plane *intel_primary_plane_create(struct drm_device *dev,
 		primary->plane = !pipe;
 
 	if (INTEL_INFO(dev)->gen >= 9) {
-		intel_primary_formats = skl_primary_formats;
-		num_formats = ARRAY_SIZE(skl_primary_formats);
+		skl_plane_get_formats(pipe, 0,
+				      &intel_primary_formats, &num_formats);
 	} else if (INTEL_INFO(dev)->gen >= 4) {
 		intel_primary_formats = gen4_primary_formats;
 		num_formats = ARRAY_SIZE(gen4_primary_formats);

@@ -1083,21 +1083,6 @@ static uint32_t vlv_plane_formats[] = {
 	DRM_FORMAT_VYUY,
 };
 
-static uint32_t skl_plane_formats[] = {
-	DRM_FORMAT_C8,
-	DRM_FORMAT_RGB565,
-	DRM_FORMAT_ABGR8888,
-	DRM_FORMAT_ARGB8888,
-	DRM_FORMAT_XBGR8888,
-	DRM_FORMAT_XRGB8888,
-	DRM_FORMAT_XBGR2101010,
-	DRM_FORMAT_XRGB2101010,
-	DRM_FORMAT_YUYV,
-	DRM_FORMAT_YVYU,
-	DRM_FORMAT_UYVY,
-	DRM_FORMAT_VYUY,
-};
-
 int
 intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 {
@@ -1169,8 +1154,9 @@ intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 		intel_plane->disable_plane = skl_disable_plane;
 		state->scaler_id = -1;
 
-		plane_formats = skl_plane_formats;
-		num_plane_formats = ARRAY_SIZE(skl_plane_formats);
+		/* plane + 1 because plane is the sprite number here */
+		skl_plane_get_formats(pipe, plane + 1,
+				      &plane_formats, &num_plane_formats);
 		break;
 	default:
 		kfree(intel_plane);
