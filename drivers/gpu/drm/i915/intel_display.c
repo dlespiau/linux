@@ -70,6 +70,15 @@ static const uint32_t gen4_primary_formats[] = {
 	DRM_FORMAT_ABGR2101010,
 };
 
+
+static const uint32_t skl_primary_formats[] = {
+	COMMON_PRIMARY_FORMATS, \
+	DRM_FORMAT_XBGR8888,
+	DRM_FORMAT_ABGR8888,
+	DRM_FORMAT_XRGB2101010,
+	DRM_FORMAT_XBGR2101010,
+};
+
 /* Cursor formats */
 static const uint32_t intel_cursor_formats[] = {
 	DRM_FORMAT_ARGB8888,
@@ -13287,12 +13296,15 @@ static struct drm_plane *intel_primary_plane_create(struct drm_device *dev,
 	if (HAS_FBC(dev) && INTEL_INFO(dev)->gen < 4)
 		primary->plane = !pipe;
 
-	if (INTEL_INFO(dev)->gen <= 3) {
-		intel_primary_formats = gen2_primary_formats;
-		num_formats = ARRAY_SIZE(gen2_primary_formats);
-	} else {
+	if (INTEL_INFO(dev)->gen >= 9) {
+		intel_primary_formats = skl_primary_formats;
+		num_formats = ARRAY_SIZE(skl_primary_formats);
+	} else if (INTEL_INFO(dev)->gen >= 4) {
 		intel_primary_formats = gen4_primary_formats;
 		num_formats = ARRAY_SIZE(gen4_primary_formats);
+	} else {
+		intel_primary_formats = gen2_primary_formats;
+		num_formats = ARRAY_SIZE(gen2_primary_formats);
 	}
 
 	drm_universal_plane_init(dev, &primary->base, 0,
