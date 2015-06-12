@@ -2585,7 +2585,7 @@ void intel_crt_init(struct drm_device *dev)
 	<td valign="top" >Description/Restrictions</td>
 	</tr>
 	<tr>
-	<td rowspan="38" valign="top" >DRM</td>
+	<td rowspan="39" valign="top" >DRM</td>
 	<td valign="top" >Generic</td>
 	<td valign="top" >“rotation”</td>
 	<td valign="top" >BITMASK</td>
@@ -2637,7 +2637,7 @@ void intel_crt_init(struct drm_device *dev)
 	<td valign="top" >CRTC that connector is attached to (atomic)</td>
 	</tr>
 	<tr>
-	<td rowspan="12" valign="top" >Plane</td>
+	<td rowspan="13" valign="top" >Plane</td>
 	<td valign="top" >“type”</td>
 	<td valign="top" >ENUM | IMMUTABLE</td>
 	<td valign="top" >{ "Overlay", "Primary", "Cursor" }</td>
@@ -2720,6 +2720,13 @@ void intel_crt_init(struct drm_device *dev)
 	<td valign="top" >DRM_BLEND_FUNC()</td>
 	<td valign="top" >Plane</td>
 	<td valign="top" >Source and destination blending factors</td>
+	</tr>
+	<tr>
+	<td valign="top" >“blend_color”</td>
+	<td valign="top" >Color</td>
+	<td valign="top" >DRM_MODE_COLOR()</td>
+	<td valign="top" >Plane</td>
+	<td valign="top" >Blend constant color</td>
 	</tr>
 	<tr>
 	<td rowspan="2" valign="top" >DVI-I</td>

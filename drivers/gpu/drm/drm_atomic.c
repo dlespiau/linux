@@ -613,6 +613,8 @@ int drm_atomic_plane_set_property(struct drm_plane *plane,
 			return -EINVAL;
 
 		state->blend_mode.func = val & GENMASK(31,0);
+	} else if (property == config->prop_blend_color) {
+		state->blend_mode.color = val;
 	} else if (plane->funcs->atomic_set_property) {
 		return plane->funcs->atomic_set_property(plane, state,
 				property, val);
