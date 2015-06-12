@@ -189,12 +189,16 @@ skl_update_plane(struct drm_plane *drm_plane, struct drm_crtc *crtc,
 	unsigned int rotation;
 	int x_offset, y_offset;
 	struct intel_crtc_state *crtc_state = to_intel_crtc(crtc)->config;
+	struct intel_plane_state *state =
+		to_intel_plane_state(drm_plane->state);
 	int scaler_id;
 
 	plane_ctl = PLANE_CTL_ENABLE |
 		PLANE_CTL_PIPE_CSC_ENABLE;
 
-	plane_ctl |= skl_plane_ctl_format(fb->pixel_format);
+	plane_ctl |= skl_plane_ctl_format(fb->pixel_format,
+					  state->premultiplied_alpha,
+					  state->drop_alpha);
 	plane_ctl |= skl_plane_ctl_tiling(fb->modifier[0]);
 
 	rotation = drm_plane->state->rotation;
@@ -207,7 +211,7 @@ skl_update_plane(struct drm_plane *drm_plane, struct drm_crtc *crtc,
 	stride_div = intel_fb_stride_alignment(dev, fb->modifier[0],
 					       fb->pixel_format);
 
-	scaler_id = to_intel_plane_state(drm_plane->state)->scaler_id;
+	scaler_id = state->scaler_id;
 
 	/* Sizes are 0 based */
 	src_w--;
@@ -1143,6 +1147,7 @@ intel_plane_init(struct drm_device *dev, enum pipe pipe, int plane)
 	}
 
 	intel_create_rotation_property(dev, intel_plane);
+	intel_plane_add_blend_properties(intel_plane);
 
 	drm_plane_helper_add(&intel_plane->base, &intel_plane_helper_funcs);
 
