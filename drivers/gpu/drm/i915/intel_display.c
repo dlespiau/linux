@@ -11560,6 +11560,7 @@ static int intel_plane_state_check_blend(struct drm_plane_state *plane_state)
 
 	state->premultiplied_alpha = false;
 	state->drop_alpha = false;
+	state->use_plane_alpha = false;
 
 	switch (mode->func) {
 	/*
@@ -11587,6 +11588,27 @@ static int intel_plane_state_check_blend(struct drm_plane_state *plane_state)
 	case DRM_BLEND_FUNC(SRC_ALPHA, ONE_MINUS_SRC_ALPHA):
 		if (!has_per_pixel_blending)
 			return -EINVAL;
+		break;
+	/* plane alpha */
+	case DRM_BLEND_FUNC(CONSTANT_ALPHA, ONE_MINUS_CONSTANT_ALPHA):
+		if (has_per_pixel_blending)
+			state->drop_alpha = true;
+		state->use_plane_alpha = true;
+		break;
+	/* plane alpha, pre-multiplied fb */
+	case DRM_BLEND_FUNC(CONSTANT_ALPHA,
+			    ONE_MINUS_CONSTANT_ALPHA_TIMES_SRC_ALPHA):
+		if (!has_per_pixel_blending)
+			return -EINVAL;
+		state->premultiplied_alpha = true;
+		state->use_plane_alpha = true;
+		break;
+	/* plane alpha, non pre-multiplied fb */
+	case DRM_BLEND_FUNC(CONSTANT_ALPHA_TIMES_SRC_ALPHA,
+			    ONE_MINUS_CONSTANT_ALPHA_TIMES_SRC_ALPHA):
+		if (!has_per_pixel_blending)
+			return -EINVAL;
+		state->use_plane_alpha = true;
 		break;
 	default:
 		return -EINVAL;
@@ -13916,6 +13938,12 @@ void intel_plane_add_blend_properties(struct intel_plane *plane)
 	if (prop)
 		drm_object_attach_property(&plane->base.base, prop,
 					   DRM_BLEND_FUNC(AUTO, AUTO));
+
+	prop = dev->mode_config.prop_blend_color;
+	if (prop)
+		drm_object_attach_property(&plane->base.base, prop,
+					   DRM_MODE_COLOR(0xffff, 0xffff,
+							  0xffff, 0xffff));
 }
 
 static int
